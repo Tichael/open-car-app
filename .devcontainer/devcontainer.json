@@ -1,0 +1,21 @@
+{
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "streetsidesoftware.code-spell-checker",
+                "vivaxy.vscode-conventional-commits",
+                "dotenv.dotenv-vscode",
+                "EditorConfig.EditorConfig",
+                "chneau.resource-monitor",
+                "Gruntfuggly.todo-tree",
+                "mk12.better-git-line-blame",
+                "bufbuild.vscode-buf"
+            ]
+        }
+    },
+    "remoteUser": "vscode"
+}
