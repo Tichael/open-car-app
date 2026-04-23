@@ -1,0 +1,12 @@
+name: open_car_builders
+description: Build runners for Open Car app code generation.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: ^3.11.4
+
+dependencies:
+  build: ^2.4.1
+  glob: ^2.1.2
+  toml: ^0.16.0

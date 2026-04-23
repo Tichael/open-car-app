@@ -1,0 +1,13 @@
+# MQTT broker configuration — copy to mqtt_broker.toml and fill in real values.
+# mqtt_broker.toml is gitignored; this example is committed as the template.
+
+[broker]
+host     = "your-broker.example.com"
+port     = 1883
+username = "your_username"
+password = "your_password"
+
+[client]
+# Unique identifier for this app instance.  Used as the {client_id} token in
+# MQTT topic templates (opencar/{client_id}/cmd and opencar/{client_id}/data).
+client_id = "dev-phone"

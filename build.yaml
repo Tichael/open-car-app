@@ -1,0 +1,21 @@
+targets:
+  $default:
+    sources:
+      - lib/**
+      - web/**
+      - test/**
+      - bin/**
+      - tool/**
+      - contracts/**
+      - config.toml.example
+      - config.toml
+      - pubspec.yaml
+      - build.yaml
+      - $package$
+    builders:
+      open_car_builders|constants_builder:
+        enabled: true
+      open_car_builders|mqtt_config_builder:
+        enabled: true
+      open_car_builders|proto_builder:
+        enabled: true

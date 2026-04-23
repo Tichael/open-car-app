@@ -1,0 +1,26 @@
+builders:
+  constants_builder:
+    import: "package:open_car_builders/builders.dart"
+    builder_factories: ["constantsBuilder"]
+    build_extensions:
+      "contracts/opencar/cars/{{vehicle}}/v1/meta.toml": ["lib/cars/{{vehicle}}/constants.g.dart"]
+    auto_apply: root_package
+    build_to: source
+
+  mqtt_config_builder:
+    import: "package:open_car_builders/builders.dart"
+    builder_factories: ["mqttConfigBuilder"]
+    build_extensions:
+      "config.toml.example": ["lib/config/mqtt_broker_config.g.dart"]
+    auto_apply: root_package
+    build_to: source
+
+  proto_builder:
+    import: "package:open_car_builders/builders.dart"
+    builder_factories: ["protoBuilder"]
+    build_extensions:
+      $package$: ["lib/generated/.proto_build.stamp"]
+    auto_apply: root_package
+    build_to: source
+    runs_before:
+      - open_car_builders|constants_builder
