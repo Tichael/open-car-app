@@ -12,3 +12,10 @@ password = "your_password"
 # MQTT topic templates (opencar/{client_id}/cmd and opencar/{client_id}/data).
 client_id = "dev-phone"
 
+[debug_server]
+# HTTP server on the device used for debug/testing in place of BLE.
+# Only active when the HTTP debug toggle is enabled inside the app (debug builds only).
+host                = "192.168.1.1"
+port                = 8080
+polling_interval_ms = 500
+

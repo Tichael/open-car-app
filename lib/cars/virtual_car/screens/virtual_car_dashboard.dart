@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_car_app/cars/virtual_car/constants.g.dart';
 import 'package:open_car_app/generated/opencar/cars/virtual_car/v1/virtual_car.pb.dart';
+import 'package:open_car_app/providers/ble_source_device_id_provider.dart';
 import 'package:open_car_app/providers/car_transport_provider.dart';
+import 'package:open_car_app/providers/http_debug_provider.dart';
 import 'package:open_car_app/providers/vehicle_state_provider.dart';
 import 'package:open_car_app/transport/car_transport.dart';
 
@@ -14,7 +17,8 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
     final snapshot = ref.watch(vehicleStateProvider);
     final transportType = ref.watch(transportTypeProvider);
     final isBle = transportType == TransportType.ble ||
-        transportType == TransportType.stub;
+        transportType == TransportType.stub ||
+        transportType == TransportType.http;
 
     final basic = snapshot.basicState as BasicState;
     final advanced = snapshot.advancedState as AdvancedState;
@@ -115,6 +119,9 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             const _AdvancedControlsPlaceholder(),
           ],
+
+          // ── Debug section (debug builds only) ───────────────────────────
+          if (kDebugMode) ...[const SizedBox(height: 24), const _DebugSection()],
 
           // ── System info ──────────────────────────────────────────────────
           if (system != null) ...[
@@ -280,5 +287,96 @@ class _SystemInfoRow extends StatelessWidget {
             color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
     );
+  }
+}
+
+// ── Debug section ─────────────────────────────────────────────────────────────
+// Only compiled into debug builds via kDebugMode guard in the dashboard build().
+
+class _DebugSection extends ConsumerWidget {
+  const _DebugSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final httpEnabled = ref.watch(httpDebugEnabledProvider);
+    final httpTransport = ref.watch(httpCarTransportProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _SectionHeader(title: 'Debug'),
+        const SizedBox(height: 8),
+        Card(
+          child: Column(
+            children: [
+              SwitchListTile(
+                title: const Text('HTTP Debug Transport'),
+                subtitle: const Text(
+                  'Replace BLE with the device HTTP server',
+                ),
+                value: httpEnabled,
+                onChanged: (value) {
+                  ref.read(httpDebugEnabledProvider.notifier).state = value;
+                },
+              ),
+              if (httpTransport != null) ...[
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.link),
+                  title: const Text('Open Pairing Window'),
+                  subtitle: const Text('Signal the device to show pairing UI'),
+                  onTap: () => _runAction(
+                    context,
+                    httpTransport.openPairingWindow,
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.phone_android),
+                  title: const Text('Register This Phone'),
+                  subtitle: const Text('Add this device to the paired list'),
+                  onTap: () => _runAction(
+                    context,
+                    () => httpTransport.registerAsPairedPhone(
+                      ref.read(bleSourceDeviceIdProvider),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.link_off),
+                  title: const Text('Clear All Bonds'),
+                  subtitle: const Text('Remove all paired phones from device'),
+                  onTap: () => _runAction(
+                    context,
+                    httpTransport.clearBonds,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _runAction(
+    BuildContext context,
+    Future<void> Function() action,
+  ) async {
+    try {
+      await action();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Done')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
+    }
   }
 }

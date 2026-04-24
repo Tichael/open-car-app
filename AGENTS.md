@@ -54,6 +54,8 @@ Constants exposed:
 - `kMqttBrokerHost` / `kMqttBrokerPort` — broker address
 - `kMqttUsername` / `kMqttPassword` — broker credentials
 - `kMqttClientId` — substituted into topic templates as `{client_id}`
+- `kDebugServerHost` / `kDebugServerPort` — debug HTTP server address (read from `[debug_server]` table)
+- `kDebugServerPollingIntervalMs` — how often `HttpCarTransport` polls `GET /state`
 
 Re-run codegen whenever `config.toml` (or `config.toml.example`) changes.
 
@@ -125,7 +127,7 @@ The abstract class lives in `lib/transport/car_transport.dart`:
 
 ```dart
 abstract class CarTransport {
-  TransportType get transportType;  // ble | mqtt | stub
+  TransportType get transportType;  // ble | mqtt | stub | http
   Stream<DeviceToApp> get messages;
   Future<void> send(AppToDevice message);
   void dispose();
@@ -133,10 +135,10 @@ abstract class CarTransport {
 ```
 
 `TransportType` drives what the UI exposes:
-- `ble` / `stub` — full access: basic + advanced state and commands
+- `ble` / `stub` / `http` — full access: basic + advanced state and commands
 - `mqtt` — restricted: basic state and commands only
 
-The active transport is provided via `carTransportProvider` (Riverpod). A derived `transportTypeProvider` re-exposes just the `TransportType` so widgets can watch it cheaply. `carTransportProvider` watches `bleConnectionProvider` — if BLE is connected it constructs a `BleCarTransport`; otherwise it constructs `MqttCarTransport`. Only one transport is alive at a time: Riverpod disposes the old one automatically when the provider rebuilds. `vehicleStateProvider` uses `ref.watch(carTransportProvider)` (not `ref.read`) so it rebuilds and re-subscribes to the new transport's message stream whenever the transport switches.
+The active transport is provided via `carTransportProvider` (Riverpod). A derived `transportTypeProvider` re-exposes just the `TransportType` so widgets can watch it cheaply. `carTransportProvider` selection order (debug builds): HTTP (if `httpDebugEnabledProvider` is true) → BLE (if `bleConnectionProvider` is `BleConnected`) → MQTT. In release builds the HTTP branch is compiled away via `kDebugMode`. Only one transport is alive at a time: Riverpod disposes the old one automatically when the provider rebuilds. `vehicleStateProvider` uses `ref.watch(carTransportProvider)` (not `ref.read`) so it rebuilds and re-subscribes to the new transport's message stream whenever the transport switches.
 
 ### BLE specifics
 
@@ -149,13 +151,27 @@ The active transport is provided via `carTransportProvider` (Riverpod). A derive
 - After `connectGatt` + `discoverServices`, call `requestMtu(244)` then write the CCCD descriptor on the notify characteristic to enable notifications (Android doesn't do this automatically)
 - If a write returns ATT error `0x0F`, call `createBond()` and retry after `BluetoothBondState.bonded`
 - `source_device_id` is generated as a UUID v4 on first app launch, persisted in `SharedPreferences` via `getOrCreateDeviceId()` in `lib/config/device_identity.dart`, and injected into the app as `bleSourceDeviceIdProvider`. Never hardcode or configure it manually
-- `sendBasicCommand()` / `sendAdvancedCommand()` in `VehicleStateNotifier` inject `sourceDeviceId` automatically when the active transport is BLE
+- `sendBasicCommand()` / `sendAdvancedCommand()` in `VehicleStateNotifier` inject `sourceDeviceId` automatically when the active transport is BLE or HTTP
 
 ### MQTT specifics
 
 - Topics follow the templates in `constants.g.dart`: `opencar/{client_id}/cmd` and `opencar/{client_id}/data`
 - `source_device_id` in `AppToDevice` is ignored over MQTT
 - Only `basic_command_bytes` can be sent over MQTT; `advanced_command_bytes` and `system_command` are BLE-only
+
+### HTTP debug transport
+
+A debug-only transport (`HttpCarTransport` in `lib/transport/http_transport.dart`) that imitates BLE over a local HTTP server running on the device. Only instantiated when `kDebugMode` is true and the user toggles it on from the dashboard debug section.
+
+- `POST /cmd` — sends an `AppToDevice` envelope (protobuf bytes body); used by `CarTransport.send()`
+- `GET /state` — polled on a `Timer.periodic` at `kDebugServerPollingIntervalMs`; response bytes parsed as `DeviceToApp`
+- `POST /pairing` — signals the device to open its pairing window
+- `POST /pair` — registers this phone; body = raw `sourceDeviceId` bytes
+- `POST /clear-bonds` — removes all paired phones from the device
+
+The three pairing methods (`openPairingWindow`, `registerAsPairedPhone`, `clearBonds`) are not on the `CarTransport` abstract interface. Vehicle screens access them by watching `httpCarTransportProvider`, which returns the active `HttpCarTransport` when it is selected, or null otherwise.
+
+Server coordinates are read from the `[debug_server]` TOML table and emitted as `kDebugServerHost`, `kDebugServerPort`, `kDebugServerPollingIntervalMs` by the `MqttConfigBuilder`.
 
 ---
 
@@ -173,8 +189,10 @@ State management uses **Riverpod**. The key providers are:
 | `selectedVehicleProvider` | `StateProvider<VehicleDefinition?>` | The vehicle the user selected; null before selection |
 | `bleConnectionProvider` | `NotifierProvider<BleConnectionNotifier, BleConnectionState>` | BLE scan/connect lifecycle; state is `BleScanning`, `BleConnected(device)`, or `BleDisconnected({warning})` |
 | `bleSourceDeviceIdProvider` | `Provider<List<int>>` | Stable per-device BLE identifier (UTF-8 bytes); overridden at startup from `SharedPreferences` |
-| `carTransportProvider` | `Provider<CarTransport>` | Active transport — `BleCarTransport` when BLE is connected, `MqttCarTransport` otherwise |
+| `carTransportProvider` | `Provider<CarTransport>` | Active transport — `HttpCarTransport` (debug), `BleCarTransport` (BLE), or `MqttCarTransport` (fallback) |
 | `transportTypeProvider` | `Provider<TransportType>` | Derived from `carTransportProvider`; widgets watch this to gate BLE-only UI |
+| `httpDebugEnabledProvider` | `StateProvider<bool>` | Whether the HTTP debug transport is enabled; toggled from the dashboard debug section |
+| `httpCarTransportProvider` | `Provider<HttpCarTransport?>` | Returns the active `HttpCarTransport` when HTTP is selected, null otherwise |
 | `vehicleStateProvider` | `NotifierProvider<VehicleStateNotifier, VehicleSnapshot>` | Accumulated vehicle state; exposes `sendBasicCommand()` and `sendAdvancedCommand()` |
 
 `VehicleSnapshot` holds the merged state for the active vehicle. The fields are typed as `GeneratedMessage` so the core provider has no vehicle-specific imports:
@@ -207,7 +225,7 @@ ref.read(vehicleStateProvider.notifier).sendAdvancedCommand(
 );
 ```
 
-`sourceDeviceId` is injected automatically by `VehicleStateNotifier._send()` when the transport type is BLE; callers do not set it.
+`sourceDeviceId` is injected automatically by `VehicleStateNotifier._send()` when the transport type is BLE or HTTP; callers do not set it.
 
 ### Per-vehicle screens
 
@@ -217,19 +235,21 @@ Every vehicle screen follows the same transport-aware gating pattern:
 
 ```dart
 final isBle = transportType == TransportType.ble ||
-               transportType == TransportType.stub;
+               transportType == TransportType.stub ||
+               transportType == TransportType.http;
 ```
 
-The screen is split into four conditional sections:
+The screen is split into five conditional sections:
 
 | Section | Visibility | Contents |
 |---|---|---|
 | **State** | Always | Odometer, driving status |
-| **Advanced State** | BLE/stub only | Speed, gear |
+| **Advanced State** | BLE/stub/http | Speed, gear |
 | **Controls** | Always | Door lock/unlock button |
-| **Advanced Controls** | BLE/stub only | Vehicle-specific advanced command widgets |
+| **Advanced Controls** | BLE/stub/http | Vehicle-specific advanced command widgets |
+| **Debug** | `kDebugMode` only | HTTP toggle; pairing buttons (visible only when HTTP is active) |
 
-Basic state/commands are always visible; advanced state/commands are gated behind `isBle`. Follow this pattern for all future vehicles.
+Basic state/commands are always visible; advanced state/commands are gated behind `isBle`. The debug section is gated by `kDebugMode` and tree-shaken from release builds. Follow this pattern for all future vehicles.
 
 ---
 
@@ -257,12 +277,14 @@ lib/
     car_transport.dart        # CarTransport abstract class + TransportType enum
     ble_transport.dart        # BleCarTransport — flutter_blue_plus; MTU negotiation, CCCD, bond handling
     mqtt_transport.dart       # MqttCarTransport — generic; accepts topic templates as constructor params
+    http_transport.dart       # HttpCarTransport — debug HTTP transport; polling GET /state, POST /cmd, pairing routes
   providers/
     available_vehicles_provider.dart  # (inside selected_vehicle_provider.dart)
     selected_vehicle_provider.dart    # availableVehiclesProvider + selectedVehicleProvider
     ble_connection_provider.dart      # BleConnectionNotifier + BleConnectionState sealed class
     ble_source_device_id_provider.dart # bleSourceDeviceIdProvider — overridden at startup
     car_transport_provider.dart       # carTransportProvider + transportTypeProvider
+    http_debug_provider.dart          # httpDebugEnabledProvider (toggle) + httpCarTransportProvider (typed cast)
     vehicle_state_provider.dart       # VehicleSnapshot, VehicleStateNotifier, vehicleStateProvider
   screens/
     vehicle_selection_screen.dart  # entry screen — lists vehicles, navigates to vehicle.buildDashboard()

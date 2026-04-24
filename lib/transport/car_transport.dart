@@ -10,6 +10,10 @@ enum TransportType {
   /// Local stub/virtual transport used for UI development.
   /// Behaves like BLE — exposes full state and commands.
   stub,
+
+  /// Debug HTTP transport that imitates BLE over a local HTTP server.
+  /// Only available in debug builds. Full access: basic + advanced state and commands.
+  http,
 }
 
 abstract class CarTransport {

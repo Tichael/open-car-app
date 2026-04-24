@@ -121,7 +121,8 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
 
   Future<void> _send(AppToDevice envelope) {
     final transportType = ref.read(transportTypeProvider);
-    if (transportType == TransportType.ble) {
+    if (transportType == TransportType.ble ||
+        transportType == TransportType.http) {
       envelope.sourceDeviceId = ref.read(bleSourceDeviceIdProvider);
     }
     return ref.read(carTransportProvider).send(envelope);
