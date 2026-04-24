@@ -27,6 +27,17 @@ class VirtualCarDefinition implements VehicleDefinition {
   String get mqttDataTopicTemplate => kMqttDataTopicTemplate;
 
   @override
+  String get bleServiceUuid => kBleServiceUuid;
+
+  @override
+  String get bleAppToDeviceCharacteristicUuid =>
+      kBleAppToDeviceCharacteristicUuid;
+
+  @override
+  String get bleDeviceToAppCharacteristicUuid =>
+      kBleDeviceToAppCharacteristicUuid;
+
+  @override
   GeneratedMessage decodeBasicState(List<int> bytes) =>
       BasicState.fromBuffer(bytes);
 

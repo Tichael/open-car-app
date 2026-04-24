@@ -11,6 +11,10 @@ abstract class VehicleDefinition {
   String get mqttCommandTopicTemplate;
   String get mqttDataTopicTemplate;
 
+  String get bleServiceUuid;
+  String get bleAppToDeviceCharacteristicUuid;
+  String get bleDeviceToAppCharacteristicUuid;
+
   /// Decode vehicle-specific basic state bytes into a typed proto instance.
   /// Called once per incoming message; result is stored and merged into state.
   GeneratedMessage decodeBasicState(List<int> bytes);

@@ -5,8 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:open_car_app/generated/opencar/core/v1/core.pb.dart';
 import 'package:open_car_app/generated/opencar/core/v1/system.pb.dart';
+import 'package:open_car_app/providers/ble_source_device_id_provider.dart';
 import 'package:open_car_app/providers/car_transport_provider.dart';
 import 'package:open_car_app/providers/selected_vehicle_provider.dart';
+import 'package:open_car_app/models/vehicle_definition.dart';
+import 'package:open_car_app/transport/car_transport.dart';
 
 class VehicleSnapshot {
   /// Decoded vehicle-specific basic state. Cast to the vehicle's BasicState
@@ -46,7 +49,7 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   @override
   VehicleSnapshot build() {
     final vehicle = ref.watch(selectedVehicleProvider)!;
-    final transport = ref.read(carTransportProvider);
+    final transport = ref.watch(carTransportProvider);
 
     _subscription = transport.messages.listen(_onMessage);
     ref.onDispose(() => _subscription?.cancel());
@@ -99,14 +102,32 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   /// The caller (vehicle-specific screen) is responsible for serialising the
   /// vehicle's own proto command type: `myCommand.writeToBuffer()`.
   Future<void> sendBasicCommand(List<int> commandBytes) {
-    final vehicle = ref.read(selectedVehicleProvider)!;
-    final envelope = AppToDevice(
+    return _send(AppToDevice(
       messageId: Int64(_nextMessageId++),
       platformId: vehicle.platformId,
       basicCommandBytes: commandBytes,
-    );
+    ));
+  }
+
+  /// Send a serialised advanced command for the active vehicle.
+  /// Only meaningful over BLE; the BLE transport sends all envelope types.
+  Future<void> sendAdvancedCommand(List<int> commandBytes) {
+    return _send(AppToDevice(
+      messageId: Int64(_nextMessageId++),
+      platformId: vehicle.platformId,
+      advancedCommandBytes: commandBytes,
+    ));
+  }
+
+  Future<void> _send(AppToDevice envelope) {
+    final transportType = ref.read(transportTypeProvider);
+    if (transportType == TransportType.ble) {
+      envelope.sourceDeviceId = ref.read(bleSourceDeviceIdProvider);
+    }
     return ref.read(carTransportProvider).send(envelope);
   }
+
+  VehicleDefinition get vehicle => ref.read(selectedVehicleProvider)!;
 }
 
 final vehicleStateProvider =

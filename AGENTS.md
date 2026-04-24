@@ -72,6 +72,9 @@ abstract class VehicleDefinition {
   int get canBusCount;
   String get mqttCommandTopicTemplate;
   String get mqttDataTopicTemplate;
+  String get bleServiceUuid;
+  String get bleAppToDeviceCharacteristicUuid;
+  String get bleDeviceToAppCharacteristicUuid;
 
   GeneratedMessage decodeBasicState(List<int> bytes);    // returns vehicle's BasicState
   GeneratedMessage decodeAdvancedState(List<int> bytes); // returns vehicle's AdvancedState
@@ -133,7 +136,7 @@ abstract class CarTransport {
 - `ble` / `stub` — full access: basic + advanced state and commands
 - `mqtt` — restricted: basic state and commands only
 
-The active transport is provided via `carTransportProvider` (Riverpod). A derived `transportTypeProvider` re-exposes just the `TransportType` so widgets can watch it cheaply. `carTransportProvider` reads `selectedVehicleProvider` to obtain the vehicle's MQTT topic templates; it falls back to `vehicle.createStubTransport()` when MQTT is unavailable.
+The active transport is provided via `carTransportProvider` (Riverpod). A derived `transportTypeProvider` re-exposes just the `TransportType` so widgets can watch it cheaply. `carTransportProvider` watches `bleConnectionProvider` — if BLE is connected it constructs a `BleCarTransport`; otherwise it constructs `MqttCarTransport`. Only one transport is alive at a time: Riverpod disposes the old one automatically when the provider rebuilds. `vehicleStateProvider` uses `ref.watch(carTransportProvider)` (not `ref.read`) so it rebuilds and re-subscribes to the new transport's message stream whenever the transport switches.
 
 ### BLE specifics
 
@@ -142,6 +145,11 @@ The active transport is provided via `carTransportProvider` (Riverpod). A derive
 - Use the `app_to_device` characteristic (write / write-without-response) for outgoing commands
 - Use the largest negotiated MTU; protobuf payloads may span multiple ATT packets
 - `source_device_id` in `AppToDevice` is required for BLE commands (stable device identifier for controller arbitration)
+- Scan by service UUID, not device name. Scan starts automatically after the user selects a vehicle
+- After `connectGatt` + `discoverServices`, call `requestMtu(244)` then write the CCCD descriptor on the notify characteristic to enable notifications (Android doesn't do this automatically)
+- If a write returns ATT error `0x0F`, call `createBond()` and retry after `BluetoothBondState.bonded`
+- `source_device_id` is generated as a UUID v4 on first app launch, persisted in `SharedPreferences` via `getOrCreateDeviceId()` in `lib/config/device_identity.dart`, and injected into the app as `bleSourceDeviceIdProvider`. Never hardcode or configure it manually
+- `sendBasicCommand()` / `sendAdvancedCommand()` in `VehicleStateNotifier` inject `sourceDeviceId` automatically when the active transport is BLE
 
 ### MQTT specifics
 
@@ -163,9 +171,11 @@ State management uses **Riverpod**. The key providers are:
 |---|---|---|
 | `availableVehiclesProvider` | `Provider<List<VehicleDefinition>>` | Hardcoded list of all supported vehicles |
 | `selectedVehicleProvider` | `StateProvider<VehicleDefinition?>` | The vehicle the user selected; null before selection |
-| `carTransportProvider` | `Provider<CarTransport>` | Active transport for the selected vehicle; reads topic templates from `selectedVehicleProvider` |
+| `bleConnectionProvider` | `NotifierProvider<BleConnectionNotifier, BleConnectionState>` | BLE scan/connect lifecycle; state is `BleScanning`, `BleConnected(device)`, or `BleDisconnected({warning})` |
+| `bleSourceDeviceIdProvider` | `Provider<List<int>>` | Stable per-device BLE identifier (UTF-8 bytes); overridden at startup from `SharedPreferences` |
+| `carTransportProvider` | `Provider<CarTransport>` | Active transport — `BleCarTransport` when BLE is connected, `MqttCarTransport` otherwise |
 | `transportTypeProvider` | `Provider<TransportType>` | Derived from `carTransportProvider`; widgets watch this to gate BLE-only UI |
-| `vehicleStateProvider` | `NotifierProvider<VehicleStateNotifier, VehicleSnapshot>` | Accumulated vehicle state; exposes `sendBasicCommand()` |
+| `vehicleStateProvider` | `NotifierProvider<VehicleStateNotifier, VehicleSnapshot>` | Accumulated vehicle state; exposes `sendBasicCommand()` and `sendAdvancedCommand()` |
 
 `VehicleSnapshot` holds the merged state for the active vehicle. The fields are typed as `GeneratedMessage` so the core provider has no vehicle-specific imports:
 
@@ -177,7 +187,7 @@ class VehicleSnapshot {
 }
 ```
 
-`VehicleStateNotifier` subscribes to `carTransportProvider.messages` on `build()` and decodes incoming bytes **once per message** via `VehicleDefinition.decodeBasicState` / `decodeAdvancedState`, then merges using `mergeFromMessage`. The vehicle's screen casts at render time with no deserialization overhead:
+`VehicleStateNotifier` uses `ref.watch(carTransportProvider)` in `build()` so it re-subscribes whenever the transport switches. It decodes incoming bytes **once per message** via `VehicleDefinition.decodeBasicState` / `decodeAdvancedState`, then merges using `mergeFromMessage`. The vehicle's screen casts at render time with no deserialization overhead:
 
 ```dart
 final basic = snapshot.basicState as BasicState;
@@ -186,10 +196,18 @@ final basic = snapshot.basicState as BasicState;
 Sending a command — the vehicle screen serialises its own proto type and passes raw bytes:
 
 ```dart
+// Basic command (available over both BLE and MQTT):
 ref.read(vehicleStateProvider.notifier).sendBasicCommand(
   BasicCommand(doorLock: DoorLockCommand(lock: true)).writeToBuffer(),
 );
+
+// Advanced command (BLE only — check isBle before calling):
+ref.read(vehicleStateProvider.notifier).sendAdvancedCommand(
+  AdvancedCommand(...).writeToBuffer(),
+);
 ```
+
+`sourceDeviceId` is injected automatically by `VehicleStateNotifier._send()` when the transport type is BLE; callers do not set it.
 
 ### Per-vehicle screens
 
@@ -224,7 +242,7 @@ config.toml                   # gitignored — real broker credentials; falls ba
 lib/
   generated/                  # generated protobuf Dart classes (committed)
   models/
-    vehicle_definition.dart   # VehicleDefinition abstract class
+    vehicle_definition.dart   # VehicleDefinition abstract class (includes BLE UUID getters)
   cars/
     <vehicle>/
       constants.g.dart        # generated constants from meta.toml + transport.toml (committed)
@@ -234,17 +252,21 @@ lib/
         <vehicle>_dashboard.dart  # vehicle-specific dashboard screen
   config/
     mqtt_broker_config.g.dart # generated MQTT connection constants (committed)
+    device_identity.dart      # getOrCreateDeviceId() — generates/persists BLE source_device_id
   transport/
     car_transport.dart        # CarTransport abstract class + TransportType enum
+    ble_transport.dart        # BleCarTransport — flutter_blue_plus; MTU negotiation, CCCD, bond handling
     mqtt_transport.dart       # MqttCarTransport — generic; accepts topic templates as constructor params
   providers/
     available_vehicles_provider.dart  # (inside selected_vehicle_provider.dart)
     selected_vehicle_provider.dart    # availableVehiclesProvider + selectedVehicleProvider
+    ble_connection_provider.dart      # BleConnectionNotifier + BleConnectionState sealed class
+    ble_source_device_id_provider.dart # bleSourceDeviceIdProvider — overridden at startup
     car_transport_provider.dart       # carTransportProvider + transportTypeProvider
     vehicle_state_provider.dart       # VehicleSnapshot, VehicleStateNotifier, vehicleStateProvider
   screens/
     vehicle_selection_screen.dart  # entry screen — lists vehicles, navigates to vehicle.buildDashboard()
-  main.dart
+  main.dart                   # bootstraps device ID and overrides bleSourceDeviceIdProvider
 tool/
   builders/                   # local build_runner builder package (open_car_builders)
     lib/src/
