@@ -1,11 +1,9 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_car_app/cars/virtual_car/constants.g.dart';
 import 'package:open_car_app/generated/opencar/cars/virtual_car/v1/virtual_car.pb.dart';
-import 'package:open_car_app/providers/ble_source_device_id_provider.dart';
 import 'package:open_car_app/providers/car_transport_provider.dart';
-import 'package:open_car_app/providers/http_debug_provider.dart';
+import 'package:open_car_app/providers/paired_vehicle_provider.dart';
 import 'package:open_car_app/providers/vehicle_state_provider.dart';
 import 'package:open_car_app/transport/car_transport.dart';
 
@@ -16,7 +14,8 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final snapshot = ref.watch(vehicleStateProvider);
     final transportType = ref.watch(transportTypeProvider);
-    final isBle = transportType == TransportType.ble ||
+    final isBle =
+        transportType == TransportType.ble ||
         transportType == TransportType.stub ||
         transportType == TransportType.http;
 
@@ -33,13 +32,55 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               kPlatformName,
-              style: Theme.of(context)
-                  .textTheme
-                  .labelSmall
-                  ?.copyWith(color: Theme.of(context).colorScheme.onPrimary),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             ),
           ),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) async {
+              if (value == 'unpair') {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Unpair vehicle?'),
+                    content: const Text(
+                      'This will remove the pairing and return you to the '
+                      'setup wizard. The vehicle will also forget this phone '
+                      '(factory reset required to re-pair).',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.of(ctx).pop(false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.of(ctx).pop(true),
+                        child: const Text('Unpair'),
+                      ),
+                    ],
+                  ),
+                );
+                if (confirmed == true) {
+                  await ref.read(pairedVehicleProvider.notifier).unpair();
+                  // AppEntryRouter will rebuild to show the wizard.
+                }
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'unpair',
+                child: ListTile(
+                  leading: Icon(Icons.link_off),
+                  title: Text('Unpair vehicle'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -102,7 +143,9 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
           _DoorLockCard(
             locked: basic.areDoorsLocked,
             onToggle: () {
-              ref.read(vehicleStateProvider.notifier).sendBasicCommand(
+              ref
+                  .read(vehicleStateProvider.notifier)
+                  .sendBasicCommand(
                     BasicCommand(
                       doorLock: DoorLockCommand(lock: !basic.areDoorsLocked),
                     ).writeToBuffer(),
@@ -111,17 +154,23 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
           ),
 
           // ── Advanced controls (BLE only) ─────────────────────────────────
-          // Placeholder: virtual-car has no advanced commands. Add advanced
-          // command widgets here for vehicles that define AdvancedCommand fields.
           if (isBle) ...[
             const SizedBox(height: 16),
             _SectionHeader(title: 'Advanced Controls'),
             const SizedBox(height: 8),
-            const _AdvancedControlsPlaceholder(),
+            _CustomState1Card(
+              enabled: advanced.customState1,
+              onToggle: () {
+                ref
+                    .read(vehicleStateProvider.notifier)
+                    .sendAdvancedCommand(
+                      AdvancedCommand(
+                        toggleCustomState1: ToggleCustomState1Command(),
+                      ).writeToBuffer(),
+                    );
+              },
+            ),
           ],
-
-          // ── Debug section (debug builds only) ───────────────────────────
-          if (kDebugMode) ...[const SizedBox(height: 24), const _DebugSection()],
 
           // ── System info ──────────────────────────────────────────────────
           if (system != null) ...[
@@ -155,9 +204,9 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+      style: Theme.of(
+        context,
+      ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
     );
   }
 }
@@ -190,8 +239,8 @@ class _StateTile extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                      ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
                 ),
               ],
             ),
@@ -230,8 +279,8 @@ class _DoorLockCard extends StatelessWidget {
                   Text(
                     'Doors',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
                   Text(
                     locked ? 'Locked' : 'Unlocked',
@@ -251,19 +300,48 @@ class _DoorLockCard extends StatelessWidget {
   }
 }
 
-class _AdvancedControlsPlaceholder extends StatelessWidget {
-  const _AdvancedControlsPlaceholder();
+class _CustomState1Card extends StatelessWidget {
+  final bool enabled;
+  final VoidCallback onToggle;
+
+  const _CustomState1Card({required this.enabled, required this.onToggle});
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(
-          'No advanced controls for this vehicle.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              enabled ? Icons.toggle_on : Icons.toggle_off,
+              color: enabled ? colorScheme.primary : colorScheme.outline,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Custom State 1',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    enabled ? 'On' : 'Off',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ],
               ),
+            ),
+            ElevatedButton(
+              onPressed: onToggle,
+              child: Text(enabled ? 'Turn Off' : 'Turn On'),
+            ),
+          ],
         ),
       ),
     );
@@ -284,99 +362,8 @@ class _SystemInfoRow extends StatelessWidget {
     return Text(
       'Firmware: $firmwareVersion  •  Hardware: $hardwareType',
       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+      ),
     );
-  }
-}
-
-// ── Debug section ─────────────────────────────────────────────────────────────
-// Only compiled into debug builds via kDebugMode guard in the dashboard build().
-
-class _DebugSection extends ConsumerWidget {
-  const _DebugSection();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final httpEnabled = ref.watch(httpDebugEnabledProvider);
-    final httpTransport = ref.watch(httpCarTransportProvider);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _SectionHeader(title: 'Debug'),
-        const SizedBox(height: 8),
-        Card(
-          child: Column(
-            children: [
-              SwitchListTile(
-                title: const Text('HTTP Debug Transport'),
-                subtitle: const Text(
-                  'Replace BLE with the device HTTP server',
-                ),
-                value: httpEnabled,
-                onChanged: (value) {
-                  ref.read(httpDebugEnabledProvider.notifier).state = value;
-                },
-              ),
-              if (httpTransport != null) ...[
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.link),
-                  title: const Text('Open Pairing Window'),
-                  subtitle: const Text('Signal the device to show pairing UI'),
-                  onTap: () => _runAction(
-                    context,
-                    httpTransport.openPairingWindow,
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.phone_android),
-                  title: const Text('Register This Phone'),
-                  subtitle: const Text('Add this device to the paired list'),
-                  onTap: () => _runAction(
-                    context,
-                    () => httpTransport.registerAsPairedPhone(
-                      ref.read(bleSourceDeviceIdProvider),
-                    ),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.link_off),
-                  title: const Text('Clear All Bonds'),
-                  subtitle: const Text('Remove all paired phones from device'),
-                  onTap: () => _runAction(
-                    context,
-                    httpTransport.clearBonds,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _runAction(
-    BuildContext context,
-    Future<void> Function() action,
-  ) async {
-    try {
-      await action();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Done')),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
-      }
-    }
   }
 }

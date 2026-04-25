@@ -10,5 +10,10 @@ const String kMqttDataTopicTemplate = "opencar/{client_id}/data";
 
 const String kBleServiceName = "Open Car Control";
 const String kBleServiceUuid = "1acff001-229b-4d38-a5d2-9af1d9b11f00";
-const String kBleAppToDeviceCharacteristicUuid = "1acff002-229b-4d38-a5d2-9af1d9b11f00";
-const String kBleDeviceToAppCharacteristicUuid = "1acff003-229b-4d38-a5d2-9af1d9b11f00";
+const String kBleAppToDeviceCharacteristicUuid =
+    "1acff002-229b-4d38-a5d2-9af1d9b11f00";
+const String kBleDeviceToAppCharacteristicUuid =
+    "1acff003-229b-4d38-a5d2-9af1d9b11f00";
+
+const int kBlePairingWindowSeconds = 30;
+const int kBleScanTimeoutSeconds = 30;

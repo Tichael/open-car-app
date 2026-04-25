@@ -6,6 +6,38 @@ Flutter mobile app for interacting with an ESP32-based car controller over BLE (
 
 Use the provided dev container — it includes Flutter, the Android SDK, `protoc`, and `protoc-gen-dart` pre-installed.
 
+If you are **not** using the dev container, run this once after cloning to prevent Flutter from listing Linux as a target device:
+
+```sh
+flutter config --no-enable-linux-desktop
+```
+
+This setting is user-level (`~/.config/flutter/settings`) — there is no project-level equivalent. The dev container handles it automatically via `postCreateCommand`.
+
+## Running on Android (wireless debugging)
+
+The dev container has no USB passthrough, so use ADB over Wi-Fi.
+
+1. On the phone, enable **Developer options → Wireless debugging** and tap **Pair device with pairing code**.
+2. In the terminal, pair once using the pairing port and code shown on the phone:
+   ```sh
+   adb pair <phone-ip>:<pairing-port>
+   ```
+3. Connect using the main wireless debugging port (different from the pairing port, also shown on the phone):
+   ```sh
+   adb connect <phone-ip>:<port>
+   ```
+4. Verify the device is listed:
+   ```sh
+   flutter devices
+   ```
+5. Run the app:
+   ```sh
+   flutter run
+   ```
+
+The pairing step (steps 1–2) is only needed once per network session. The `adb connect` (step 3) must be repeated each time the dev container restarts.
+
 ## Code generation
 
 This project generates Dart code from the `contracts/` git submodule (protobuf schemas and TOML metadata). Generated files are committed, so a normal `flutter build` always works without running codegen first.

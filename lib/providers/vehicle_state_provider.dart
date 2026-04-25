@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 
 import 'package:fixnum/fixnum.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
 import 'package:open_car_app/generated/opencar/core/v1/core.pb.dart';
@@ -65,6 +67,16 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   void _onMessage(DeviceToApp msg) {
     if (!msg.hasStateUpdate()) return;
 
+    if (kDebugMode) {
+      final u = msg.stateUpdate;
+      final fields = [
+        if (u.hasVehicleState() && u.vehicleState.basicStateBytes.isNotEmpty) 'basicState',
+        if (u.hasVehicleState() && u.vehicleState.advancedStateBytes.isNotEmpty) 'advancedState',
+        if (u.hasSystemState()) 'system',
+      ];
+      dev.log('State update received: ${fields.isEmpty ? '(no known fields)' : fields.join(', ')}', name: 'VehicleState');
+    }
+
     final vehicle = ref.read(selectedVehicleProvider)!;
     final update = msg.stateUpdate;
     var current = state;
@@ -124,6 +136,10 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
     if (transportType == TransportType.ble ||
         transportType == TransportType.http) {
       envelope.sourceDeviceId = ref.read(bleSourceDeviceIdProvider);
+    }
+    if (kDebugMode) {
+      final kind = envelope.hasBasicCommandBytes() ? 'basic' : 'advanced';
+      dev.log('Sending $kind command (msgId: ${envelope.messageId}) via $transportType', name: 'VehicleState');
     }
     return ref.read(carTransportProvider).send(envelope);
   }

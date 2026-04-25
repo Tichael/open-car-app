@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:open_car_app/providers/selected_vehicle_provider.dart';
 
+/// Legacy screen — retained for reference only.
+/// Navigation is now handled by [AppEntryRouter] in main.dart.
 class VehicleSelectionScreen extends ConsumerWidget {
   const VehicleSelectionScreen({super.key});
 
@@ -20,11 +22,8 @@ class VehicleSelectionScreen extends ConsumerWidget {
             title: Text(vehicle.platformName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              ref.read(selectedVehicleProvider.notifier).state = vehicle;
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => vehicle.buildDashboard(),
-                ),
+                MaterialPageRoute(builder: (_) => vehicle.buildDashboard()),
               );
             },
           );

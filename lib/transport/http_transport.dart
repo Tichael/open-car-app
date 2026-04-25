@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as dev;
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
@@ -29,6 +30,7 @@ class HttpCarTransport implements CarTransport {
     required int pollingIntervalMs,
   })  : _baseUrl = 'http://$host:$port',
         _pollingInterval = Duration(milliseconds: pollingIntervalMs) {
+    dev.log('Polling $_baseUrl every ${pollingIntervalMs}ms', name: 'HttpTransport');
     _startPolling();
   }
 
@@ -43,8 +45,8 @@ class HttpCarTransport implements CarTransport {
         final msg = DeviceToApp.fromBuffer(response.bodyBytes);
         if (!_controller.isClosed) _controller.add(msg);
       }
-    } catch (_) {
-      // Ignore transient network errors during polling; the timer will retry.
+    } catch (e) {
+      dev.log('Poll error: $e', name: 'HttpTransport');
     }
   }
 
@@ -62,6 +64,7 @@ class HttpCarTransport implements CarTransport {
       body: Uint8List.fromList(message.writeToBuffer()),
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      dev.log('POST /cmd failed: ${response.statusCode}', name: 'HttpTransport');
       throw HttpTransportException(
         'POST /cmd returned ${response.statusCode}',
       );
@@ -70,6 +73,7 @@ class HttpCarTransport implements CarTransport {
 
   /// Ask the device to open its pairing window.
   Future<void> openPairingWindow() async {
+    dev.log('POST /pairing', name: 'HttpTransport');
     final response = await http.post(Uri.parse('$_baseUrl/pairing'));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw HttpTransportException(
@@ -82,6 +86,7 @@ class HttpCarTransport implements CarTransport {
   /// [sourceDeviceId] is the stable per-device identifier (UTF-8 bytes from
   /// [bleSourceDeviceIdProvider]).
   Future<void> registerAsPairedPhone(List<int> sourceDeviceId) async {
+    dev.log('POST /pair', name: 'HttpTransport');
     final response = await http.post(
       Uri.parse('$_baseUrl/pair'),
       headers: {'Content-Type': 'application/octet-stream'},
@@ -96,6 +101,7 @@ class HttpCarTransport implements CarTransport {
 
   /// Remove all paired phones from the device.
   Future<void> clearBonds() async {
+    dev.log('POST /clear-bonds', name: 'HttpTransport');
     final response = await http.post(Uri.parse('$_baseUrl/clear-bonds'));
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw HttpTransportException(

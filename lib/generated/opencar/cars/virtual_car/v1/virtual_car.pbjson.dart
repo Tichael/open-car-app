@@ -41,11 +41,13 @@ const AdvancedState$json = {
   '2': [
     {'1': 'speed', '3': 1, '4': 1, '5': 5, '9': 0, '10': 'speed', '17': true},
     {'1': 'gear', '3': 2, '4': 1, '5': 14, '6': '.opencar.cars.virtual_car.v1.AdvancedState.Gear', '9': 1, '10': 'gear', '17': true},
+    {'1': 'custom_state1', '3': 3, '4': 1, '5': 8, '9': 2, '10': 'customState1', '17': true},
   ],
   '4': [AdvancedState_Gear$json],
   '8': [
     {'1': '_speed'},
     {'1': '_gear'},
+    {'1': '_custom_state1'},
   ],
 };
 
@@ -65,9 +67,10 @@ const AdvancedState_Gear$json = {
 final $typed_data.Uint8List advancedStateDescriptor = $convert.base64Decode(
     'Cg1BZHZhbmNlZFN0YXRlEhkKBXNwZWVkGAEgASgFSABSBXNwZWVkiAEBEkgKBGdlYXIYAiABKA'
     '4yLy5vcGVuY2FyLmNhcnMudmlydHVhbF9jYXIudjEuQWR2YW5jZWRTdGF0ZS5HZWFySAFSBGdl'
-    'YXKIAQEiXwoER2VhchIUChBHRUFSX1VOU1BFQ0lGSUVEEAASDQoJR0VBUl9QQVJLEAESEAoMR0'
-    'VBUl9SRVZFUlNFEAISEAoMR0VBUl9ORVVUUkFMEAMSDgoKR0VBUl9EUklWRRAEQggKBl9zcGVl'
-    'ZEIHCgVfZ2Vhcg==');
+    'YXKIAQESKAoNY3VzdG9tX3N0YXRlMRgDIAEoCEgCUgxjdXN0b21TdGF0ZTGIAQEiXwoER2Vhch'
+    'IUChBHRUFSX1VOU1BFQ0lGSUVEEAASDQoJR0VBUl9QQVJLEAESEAoMR0VBUl9SRVZFUlNFEAIS'
+    'EAoMR0VBUl9ORVVUUkFMEAMSDgoKR0VBUl9EUklWRRAEQggKBl9zcGVlZEIHCgVfZ2VhckIQCg'
+    '5fY3VzdG9tX3N0YXRlMQ==');
 
 @$core.Deprecated('Use basicCommandDescriptor instead')
 const BasicCommand$json = {
@@ -88,11 +91,19 @@ final $typed_data.Uint8List basicCommandDescriptor = $convert.base64Decode(
 @$core.Deprecated('Use advancedCommandDescriptor instead')
 const AdvancedCommand$json = {
   '1': 'AdvancedCommand',
+  '2': [
+    {'1': 'toggle_custom_state1', '3': 1, '4': 1, '5': 11, '6': '.opencar.cars.virtual_car.v1.ToggleCustomState1Command', '9': 0, '10': 'toggleCustomState1'},
+  ],
+  '8': [
+    {'1': 'action'},
+  ],
 };
 
 /// Descriptor for `AdvancedCommand`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List advancedCommandDescriptor = $convert.base64Decode(
-    'Cg9BZHZhbmNlZENvbW1hbmQ=');
+    'Cg9BZHZhbmNlZENvbW1hbmQSagoUdG9nZ2xlX2N1c3RvbV9zdGF0ZTEYASABKAsyNi5vcGVuY2'
+    'FyLmNhcnMudmlydHVhbF9jYXIudjEuVG9nZ2xlQ3VzdG9tU3RhdGUxQ29tbWFuZEgAUhJ0b2dn'
+    'bGVDdXN0b21TdGF0ZTFCCAoGYWN0aW9u');
 
 @$core.Deprecated('Use doorLockCommandDescriptor instead')
 const DoorLockCommand$json = {
@@ -105,4 +116,13 @@ const DoorLockCommand$json = {
 /// Descriptor for `DoorLockCommand`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List doorLockCommandDescriptor = $convert.base64Decode(
     'Cg9Eb29yTG9ja0NvbW1hbmQSEgoEbG9jaxgBIAEoCFIEbG9jaw==');
+
+@$core.Deprecated('Use toggleCustomState1CommandDescriptor instead')
+const ToggleCustomState1Command$json = {
+  '1': 'ToggleCustomState1Command',
+};
+
+/// Descriptor for `ToggleCustomState1Command`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List toggleCustomState1CommandDescriptor = $convert.base64Decode(
+    'ChlUb2dnbGVDdXN0b21TdGF0ZTFDb21tYW5k');
 
