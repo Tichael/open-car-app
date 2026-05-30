@@ -9,6 +9,7 @@ import 'package:open_car_app/generated/opencar/core/v1/core.pb.dart';
 import 'package:open_car_app/providers/ble_connection_provider.dart';
 import 'package:open_car_app/providers/paired_vehicle_provider.dart';
 import 'package:open_car_app/providers/selected_vehicle_provider.dart';
+import 'package:open_car_app/providers/ble_provider.dart';
 import 'package:open_car_app/transport/ble_transport.dart';
 import 'package:open_car_app/transport/car_transport.dart';
 import 'package:open_car_app/transport/http_transport.dart';
@@ -56,13 +57,14 @@ final carTransportProvider = Provider<CarTransport>((ref) {
 
   if (ble is BleReady) {
     final transport = BleCarTransport(
-      device: ble.device,
+      ble: ref.read(bleProvider),
+      deviceId: ble.deviceId,
       serviceUuid: vehicle.bleServiceUuid,
       appToDeviceCharacteristicUuid: vehicle.bleAppToDeviceCharacteristicUuid,
       deviceToAppCharacteristicUuid: vehicle.bleDeviceToAppCharacteristicUuid,
     );
     dev.log(
-      'Using BLE transport (device: ${ble.device.remoteId})',
+      'Using BLE transport (device: ${ble.deviceId})',
       name: 'TransportProvider',
     );
     ref.onDispose(transport.dispose);

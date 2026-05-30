@@ -43,3 +43,10 @@ android {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // RxJava 2 is a transitive dependency of reactive_ble_mobile (via RxAndroidBle),
+    // but must be declared explicitly so OpenCarApplication.kt can import it directly
+    // to install the global UndeliverableException handler.
+    implementation("io.reactivex.rxjava2:rxjava:2.2.17")
+}

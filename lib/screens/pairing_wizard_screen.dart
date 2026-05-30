@@ -3,8 +3,9 @@ import 'dart:developer' as dev;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
+import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_car_app/providers/ble_provider.dart';
 import 'package:open_car_app/cars/virtual_car/constants.g.dart';
 import 'package:open_car_app/config/mqtt_broker_config.g.dart';
 import 'package:open_car_app/config/paired_vehicle_config.dart';
@@ -45,7 +46,8 @@ class PairingWizardScreen extends ConsumerStatefulWidget {
 
 class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
   _Step _step = _Step.prompt;
-  BluetoothDevice? _foundDevice;
+  String? _foundDeviceId;
+  String? _foundDeviceName;
   String _errorMessage = '';
   bool _staleBondWarning = false;
 
@@ -53,7 +55,7 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
   int _remainingSeconds = kBleScanTimeoutSeconds;
   Timer? _scanTimeoutTimer;
   Timer? _countdownTimer;
-  StreamSubscription<List<ScanResult>>? _scanSubscription;
+  StreamSubscription<DiscoveredDevice>? _scanSubscription;
 
   // HTTP mode (debug only)
   bool _httpMode = false;
@@ -94,23 +96,24 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
       _remainingSeconds = kBleScanTimeoutSeconds;
     });
 
-    FlutterBluePlus.startScan(
-      withServices: [Guid(vehicle.bleServiceUuid)],
-      timeout: Duration(seconds: kBleScanTimeoutSeconds),
-    );
-
-    _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
-      if (results.isEmpty || _step != _Step.scanning) return;
-      final device = results.first.device;
-      dev.log('Wizard found device: ${device.remoteId}', name: 'PairingWizard');
-      _stopScan();
-      if (mounted) {
-        setState(() {
-          _foundDevice = device;
-          _step = _Step.found;
+    final ble = ref.read(bleProvider);
+    _scanSubscription = ble
+        .scanForDevices(
+          withServices: [Uuid.parse(vehicle.bleServiceUuid)],
+          scanMode: ScanMode.lowLatency,
+        )
+        .listen((device) {
+          if (_step != _Step.scanning) return;
+          dev.log('Wizard found device: ${device.id}', name: 'PairingWizard');
+          _stopScan();
+          if (mounted) {
+            setState(() {
+              _foundDeviceId = device.id;
+              _foundDeviceName = device.name;
+              _step = _Step.found;
+            });
+          }
         });
-      }
-    });
 
     _scanTimeoutTimer = Timer(Duration(seconds: kBleScanTimeoutSeconds), () {
       if (_step == _Step.scanning) {
@@ -135,54 +138,145 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
     _scanTimeoutTimer = null;
     _countdownTimer?.cancel();
     _countdownTimer = null;
-    FlutterBluePlus.stopScan();
+    // flutter_reactive_ble stops scanning automatically when the subscription
+    // is cancelled — no explicit stopScan() call needed.
   }
 
   // ── BLE pairing ─────────────────────────────────────────────────────────────
 
   Future<void> _pairBle() async {
-    final device = _foundDevice!;
+    final deviceId = _foundDeviceId!;
     setState(() => _step = _Step.pairing);
 
+    final ble = ref.read(bleProvider);
+    StreamSubscription<ConnectionStateUpdate>? connSub;
+
     try {
-      dev.log(
-        'Wizard: connecting to ${device.remoteId}',
-        name: 'PairingWizard',
-      );
-      await device.connect(autoConnect: false);
-      await device.discoverServices();
-      await device.createBond();
+      dev.log('Wizard: connecting to $deviceId', name: 'PairingWizard');
 
-      await device.bondState
-          .firstWhere((s) => s == BluetoothBondState.bonded)
-          .timeout(Duration(seconds: kBlePairingWindowSeconds));
-      dev.log('Wizard: bond complete', name: 'PairingWizard');
+      final connectedCompleter = Completer<void>();
+      // Fires if the connection drops *after* we connected — stale-bond
+      // scenario where the firmware closes the link because the phone is no
+      // longer in its bond table.
+      final disconnectCompleter = Completer<void>();
 
-      await device.disconnect();
+      connSub = ble
+          .connectToDevice(
+            id: deviceId,
+            connectionTimeout: Duration(seconds: kBlePairingWindowSeconds),
+          )
+          .listen(
+            (update) {
+              switch (update.connectionState) {
+                case DeviceConnectionState.connected:
+                  if (!connectedCompleter.isCompleted) {
+                    connectedCompleter.complete();
+                  }
+                case DeviceConnectionState.disconnected:
+                  if (connectedCompleter.isCompleted &&
+                      !disconnectCompleter.isCompleted) {
+                    // Dropped after connecting — stale-bond scenario.
+                    disconnectCompleter.completeError(
+                      Exception('Connection dropped before pairing'),
+                    );
+                  }
+                // If not yet connected: connectToDevice auto-retries;
+                // do nothing and let it keep trying until timeout.
+                default:
+                  break;
+              }
+            },
+            onError: (Object e) {
+              if (!connectedCompleter.isCompleted) {
+                connectedCompleter.completeError(e);
+              } else if (!disconnectCompleter.isCompleted) {
+                disconnectCompleter.completeError(e);
+              }
+            },
+          );
+
+      await connectedCompleter.future;
+      await ble.discoverAllServices(deviceId);
 
       final vehicle = ref.read(availableVehiclesProvider).first;
+
+      // Write a single probe byte to the app→device characteristic to trigger
+      // Android bonding. Subscribing to the device→app characteristic does NOT
+      // require bonding on this firmware — only writes do. The OS intercepts
+      // the ATT_ERROR_INSUFFICIENT_AUTH response, shows the pairing dialog,
+      // establishes the bond, and lets us retry. We loop until the write
+      // succeeds (bond confirmed) or the connection drops (stale-bond: firmware
+      // closed the link because it still had an old bond record).
+      final rxChar = QualifiedCharacteristic(
+        deviceId: deviceId,
+        serviceId: Uuid.parse(vehicle.bleServiceUuid),
+        characteristicId: Uuid.parse(vehicle.bleAppToDeviceCharacteristicUuid),
+      );
+
+      dev.log(
+        'Wizard: writing probe to trigger bonding',
+        name: 'PairingWizard',
+      );
+      bool bondConfirmed = false;
+      final deadline = DateTime.now().add(
+        Duration(seconds: kBlePairingWindowSeconds),
+      );
+      while (DateTime.now().isBefore(deadline) && !bondConfirmed) {
+        if (disconnectCompleter.isCompleted) break;
+        try {
+          // Race the write against the disconnect signal so we don't wait for
+          // the GATT callback if the firmware drops the link (e.g. stale-bond
+          // key mismatch after the Android pairing dialog is confirmed).
+          // disconnectCompleter.future throws immediately once completed.
+          await Future.any([
+            ble.writeCharacteristicWithResponse(rxChar, value: [0]),
+            disconnectCompleter.future,
+          ]);
+          bondConfirmed = true;
+        } on Exception {
+          if (disconnectCompleter.isCompleted) break;
+          // Auth failure / transient error — bonding in progress. Back off.
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+      }
+
+      // Rethrow any stale-bond disconnect that arrived during the retry loop.
+      if (disconnectCompleter.isCompleted) {
+        await disconnectCompleter.future;
+      }
+
+      if (!bondConfirmed) {
+        throw TimeoutException(
+          'Bonding did not complete within the pairing window',
+          Duration(seconds: kBlePairingWindowSeconds),
+        );
+      }
+
+      dev.log('Wizard: bond confirmed — saving config', name: 'PairingWizard');
+      await connSub.cancel();
+      connSub = null;
+
       await ref
           .read(pairedVehicleProvider.notifier)
           .pair(
             PairedVehicleConfig(
               vehicleId: vehicle.platformName,
-              bleRemoteId: device.remoteId.toString(),
+              bleRemoteId: deviceId,
               transportPreference: TransportPreference.ble,
             ),
           );
       // AppEntryRouter will rebuild to show the dashboard.
     } on TimeoutException {
+      await connSub?.cancel();
       _setError(
         'Pairing timed out. Make sure the pairing window is still open on '
         'the device and try again.',
       );
-    } on FlutterBluePlusException catch (e) {
-      // Stale-bond scenario: the phone forgot the device but the firmware
-      // still remembered it. The firmware rejects the bond attempt and clears
-      // its stale entry, leaving bond state as none. The next attempt will
-      // succeed normally.
-      if (e.function == 'createBond' &&
-          (e.description?.contains('none') ?? false)) {
+    } on Exception catch (e) {
+      await connSub?.cancel();
+      // If the connection dropped after connecting, treat it as a stale-bond
+      // scenario (firmware cleared its entry; next attempt will succeed).
+      if (e.toString().contains('Connection dropped before pairing')) {
         dev.log(
           'Stale bond detected — firmware cleared its entry, retry needed',
           name: 'PairingWizard',
@@ -195,14 +289,7 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
         }
         return;
       }
-      dev.log(
-        'Pairing failed — FlutterBluePlusException: '
-        'platform=${e.platform} function=${e.function} '
-        'code=${e.code} description=${e.description}',
-        name: 'PairingWizard',
-      );
-      _setError('Pairing failed: $e');
-    } on Exception catch (e) {
+      dev.log('Pairing failed: $e', name: 'PairingWizard');
       _setError('Pairing failed: $e');
     }
   }
@@ -306,7 +393,8 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
   void _retry() {
     setState(() {
       _step = _Step.prompt;
-      _foundDevice = null;
+      _foundDeviceId = null;
+      _foundDeviceName = null;
       _errorMessage = '';
       _staleBondWarning = false;
       _httpMode = false;
@@ -405,7 +493,6 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
   }
 
   Widget _buildFound() {
-    final device = _foundDevice!;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -417,9 +504,17 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
           style: Theme.of(context).textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 8),
+        if (_foundDeviceName != null && _foundDeviceName!.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            _foundDeviceName!,
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+        const SizedBox(height: 4),
         Text(
-          device.remoteId.toString(),
+          _foundDeviceId ?? '',
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
