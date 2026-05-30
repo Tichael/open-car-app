@@ -47,10 +47,15 @@ class VehicleSnapshot {
 class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   StreamSubscription<DeviceToApp>? _subscription;
   int _nextMessageId = 0;
+  // Cached across rebuilds so teardown races (vehicle → null before
+  // this notifier is disposed) don't crash build().
+  VehicleDefinition? _vehicle;
 
   @override
   VehicleSnapshot build() {
-    final vehicle = ref.watch(selectedVehicleProvider)!;
+    final latestVehicle = ref.read(selectedVehicleProvider);
+    if (latestVehicle != null) _vehicle = latestVehicle;
+    final vehicle = _vehicle!;
     final transport = ref.watch(carTransportProvider);
 
     _subscription = transport.messages.listen(_onMessage);
@@ -70,11 +75,16 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
     if (kDebugMode) {
       final u = msg.stateUpdate;
       final fields = [
-        if (u.hasVehicleState() && u.vehicleState.basicStateBytes.isNotEmpty) 'basicState',
-        if (u.hasVehicleState() && u.vehicleState.advancedStateBytes.isNotEmpty) 'advancedState',
+        if (u.hasVehicleState() && u.vehicleState.basicStateBytes.isNotEmpty)
+          'basicState',
+        if (u.hasVehicleState() && u.vehicleState.advancedStateBytes.isNotEmpty)
+          'advancedState',
         if (u.hasSystemState()) 'system',
       ];
-      dev.log('State update received: ${fields.isEmpty ? '(no known fields)' : fields.join(', ')}', name: 'VehicleState');
+      dev.log(
+        'State update received: ${fields.isEmpty ? '(no known fields)' : fields.join(', ')}',
+        name: 'VehicleState',
+      );
     }
 
     final vehicle = ref.read(selectedVehicleProvider)!;
@@ -114,21 +124,25 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   /// The caller (vehicle-specific screen) is responsible for serialising the
   /// vehicle's own proto command type: `myCommand.writeToBuffer()`.
   Future<void> sendBasicCommand(List<int> commandBytes) {
-    return _send(AppToDevice(
-      messageId: Int64(_nextMessageId++),
-      platformId: vehicle.platformId,
-      basicCommandBytes: commandBytes,
-    ));
+    return _send(
+      AppToDevice(
+        messageId: Int64(_nextMessageId++),
+        platformId: vehicle.platformId,
+        basicCommandBytes: commandBytes,
+      ),
+    );
   }
 
   /// Send a serialised advanced command for the active vehicle.
   /// Only meaningful over BLE; the BLE transport sends all envelope types.
   Future<void> sendAdvancedCommand(List<int> commandBytes) {
-    return _send(AppToDevice(
-      messageId: Int64(_nextMessageId++),
-      platformId: vehicle.platformId,
-      advancedCommandBytes: commandBytes,
-    ));
+    return _send(
+      AppToDevice(
+        messageId: Int64(_nextMessageId++),
+        platformId: vehicle.platformId,
+        advancedCommandBytes: commandBytes,
+      ),
+    );
   }
 
   Future<void> _send(AppToDevice envelope) {
@@ -139,7 +153,10 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
     }
     if (kDebugMode) {
       final kind = envelope.hasBasicCommandBytes() ? 'basic' : 'advanced';
-      dev.log('Sending $kind command (msgId: ${envelope.messageId}) via $transportType', name: 'VehicleState');
+      dev.log(
+        'Sending $kind command (msgId: ${envelope.messageId}) via $transportType',
+        name: 'VehicleState',
+      );
     }
     return ref.read(carTransportProvider).send(envelope);
   }
@@ -149,4 +166,5 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
 
 final vehicleStateProvider =
     NotifierProvider<VehicleStateNotifier, VehicleSnapshot>(
-        VehicleStateNotifier.new);
+      VehicleStateNotifier.new,
+    );

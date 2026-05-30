@@ -56,11 +56,12 @@ abstract class CarTransport {
 ### Pairing & connection model
 Device advertises **only** while its pairing button is held. The app never scans outside `PairingWizardScreen`.
 
-- **First launch / unpaired**: `AppEntryRouter` shows `PairingWizardScreen`. User holds button → wizard scans → taps Pair → `createBond()` → await `bonded` → `pairedVehicleProvider.notifier.pair(config)` → router rebuilds to dashboard.
+- **First launch / unpaired**: `AppEntryRouter` shows `PairingWizardScreen`. User holds button → wizard scans → taps Pair → `connect` → `discoverServices` → `createBond()` → await `bonded` → `disconnect()` → `pairedVehicleProvider.notifier.pair(config)` → router rebuilds to dashboard.
 - **Subsequent launches**: `bleConnectionProvider` reconnects directly to the saved `bleRemoteId` (no scan). Retries every 5 s on disconnect.
 - **HTTP debug path** (debug builds only): wizard offers host/port entry + POST `/pairing` + POST `/pair`; saves config with `transportPreference = http`.
 - **Unpair**: overflow menu on dashboard → confirmation dialog → `pairedVehicleProvider.notifier.unpair()` → router returns to wizard.
-- **`createBond()` is only called in the wizard** — never in `bleConnectionProvider` or transport. The device controls its pairing window; passive wait avoids spurious second dialogs.
+- **`createBond()` is only called in the wizard** — never in `bleConnectionProvider` or transport.
+- **Stale-bond recovery**: if `createBond()` fails with `BmBondStateEnum.none` (phone forgot the bond but firmware still remembered it), the wizard returns to the "found" step with an inline warning banner. The firmware clears its stale entry on that first failed attempt; the next tap of Pair succeeds normally (user sees two OS pairing prompts total).
 
 ### BLE specifics
 - Direct reconnect via `BluetoothDevice.fromId(remoteId)` — no scan after pairing.

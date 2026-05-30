@@ -157,3 +157,12 @@ final $typed_data.Uint8List upsertPairedPhoneCommandDescriptor = $convert.base64
     'ChhVcHNlcnRQYWlyZWRQaG9uZUNvbW1hbmQSGwoJZGV2aWNlX2lkGAEgASgMUghkZXZpY2VJZA'
     '==');
 
+@$core.Deprecated('Use systemEventDescriptor instead')
+const SystemEvent$json = {
+  '1': 'SystemEvent',
+};
+
+/// Descriptor for `SystemEvent`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List systemEventDescriptor = $convert.base64Decode(
+    'CgtTeXN0ZW1FdmVudA==');
+

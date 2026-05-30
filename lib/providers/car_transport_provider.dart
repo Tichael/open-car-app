@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:developer' as dev;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_car_app/config/mqtt_broker_config.g.dart';
 import 'package:open_car_app/config/paired_vehicle_config.dart';
+import 'package:open_car_app/generated/opencar/core/v1/core.pb.dart';
 import 'package:open_car_app/providers/ble_connection_provider.dart';
 import 'package:open_car_app/providers/paired_vehicle_provider.dart';
 import 'package:open_car_app/providers/selected_vehicle_provider.dart';
@@ -13,8 +15,23 @@ import 'package:open_car_app/transport/http_transport.dart';
 import 'package:open_car_app/providers/ble_source_device_id_provider.dart';
 import 'package:open_car_app/transport/mqtt_transport.dart';
 
+/// Returned by [carTransportProvider] during the brief window between
+/// unpairing and provider disposal, so that dependent providers don't crash.
+class _NullCarTransport implements CarTransport {
+  const _NullCarTransport();
+  @override
+  TransportType get transportType => TransportType.stub;
+  @override
+  Stream<DeviceToApp> get messages => const Stream.empty();
+  @override
+  Future<void> send(AppToDevice message) async {}
+  @override
+  void dispose() {}
+}
+
 final carTransportProvider = Provider<CarTransport>((ref) {
-  final vehicle = ref.watch(selectedVehicleProvider)!;
+  final vehicle = ref.watch(selectedVehicleProvider);
+  if (vehicle == null) return const _NullCarTransport();
   final config = ref.watch(pairedVehicleProvider);
 
   // Debug-only: HTTP transport is used when the vehicle was paired via the

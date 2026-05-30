@@ -110,7 +110,11 @@ class BleConnectionNotifier extends Notifier<BleConnectionState> {
 
     try {
       dev.log('Connecting to $remoteId', name: 'BleConnection');
-      await device.connect(autoConnect: false);
+      // mtu: 244 — negotiate MTU as the last step of connect(), before
+      // discoverServices() is called. Doing this inside connect() avoids
+      // a second redundant requestMtu call and keeps the ordering correct.
+      await device.connect(autoConnect: false, mtu: 244);
+
       await device.discoverServices();
 
       dev.log(

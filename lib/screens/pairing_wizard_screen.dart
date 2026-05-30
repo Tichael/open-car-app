@@ -47,6 +47,7 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
   _Step _step = _Step.prompt;
   BluetoothDevice? _foundDevice;
   String _errorMessage = '';
+  bool _staleBondWarning = false;
 
   // Scan countdown
   int _remainingSeconds = kBleScanTimeoutSeconds;
@@ -103,11 +104,12 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
       final device = results.first.device;
       dev.log('Wizard found device: ${device.remoteId}', name: 'PairingWizard');
       _stopScan();
-      if (mounted)
+      if (mounted) {
         setState(() {
           _foundDevice = device;
           _step = _Step.found;
         });
+      }
     });
 
     _scanTimeoutTimer = Timer(Duration(seconds: kBleScanTimeoutSeconds), () {
@@ -149,19 +151,13 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
       );
       await device.connect(autoConnect: false);
       await device.discoverServices();
-
-      // Apparently, createBond() is not required since Android already shows a popup. Maybe it's the cause of the double popups.
-      // dev.log('Wizard: requesting bond', name: 'PairingWizard');
-      // await device.createBond();
+      await device.createBond();
 
       await device.bondState
           .firstWhere((s) => s == BluetoothBondState.bonded)
           .timeout(Duration(seconds: kBlePairingWindowSeconds));
-
       dev.log('Wizard: bond complete', name: 'PairingWizard');
 
-      // Disconnect so bleConnectionProvider can own the connection lifecycle
-      // after we save the config.
       await device.disconnect();
 
       final vehicle = ref.read(availableVehiclesProvider).first;
@@ -180,6 +176,32 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
         'Pairing timed out. Make sure the pairing window is still open on '
         'the device and try again.',
       );
+    } on FlutterBluePlusException catch (e) {
+      // Stale-bond scenario: the phone forgot the device but the firmware
+      // still remembered it. The firmware rejects the bond attempt and clears
+      // its stale entry, leaving bond state as none. The next attempt will
+      // succeed normally.
+      if (e.function == 'createBond' &&
+          (e.description?.contains('none') ?? false)) {
+        dev.log(
+          'Stale bond detected — firmware cleared its entry, retry needed',
+          name: 'PairingWizard',
+        );
+        if (mounted) {
+          setState(() {
+            _step = _Step.found;
+            _staleBondWarning = true;
+          });
+        }
+        return;
+      }
+      dev.log(
+        'Pairing failed — FlutterBluePlusException: '
+        'platform=${e.platform} function=${e.function} '
+        'code=${e.code} description=${e.description}',
+        name: 'PairingWizard',
+      );
+      _setError('Pairing failed: $e');
     } on Exception catch (e) {
       _setError('Pairing failed: $e');
     }
@@ -286,6 +308,7 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
       _step = _Step.prompt;
       _foundDevice = null;
       _errorMessage = '';
+      _staleBondWarning = false;
       _httpMode = false;
       _httpPairingWindowOpen = false;
       _httpTestResult = '';
@@ -402,6 +425,37 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
             context,
           ).textTheme.bodySmall?.copyWith(fontFamily: 'monospace'),
         ),
+        if (_staleBondWarning) ...[
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Your phone had previously paired with this vehicle, but '
+                    'the vehicle was still remembering it. The vehicle has now '
+                    'cleared the old pairing. Tap Pair again to complete the '
+                    'process — you may see a second pairing prompt.',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
         const SizedBox(height: 32),
         FilledButton.icon(
           onPressed: _pairBle,

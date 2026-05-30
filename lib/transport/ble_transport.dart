@@ -40,10 +40,8 @@ class BleCarTransport implements CarTransport {
 
   Future<void> _init(String serviceUuid) async {
     try {
-      // Negotiate the largest usable MTU — firmware note requires 244.
-      final mtu = await _device.requestMtu(244);
-      dev.log('MTU negotiated: $mtu', name: 'BleTransport');
-
+      // MTU is negotiated by BleConnectionNotifier before BleReady is set;
+      // no need to request it again here.
       final services = _device.servicesList;
       final target = services.firstWhere(
         (s) => s.uuid.toString().toLowerCase() == serviceUuid.toLowerCase(),
@@ -66,13 +64,33 @@ class BleCarTransport implements CarTransport {
         return;
       }
 
-      // Notifications were already enabled by BleConnectionNotifier during the
-      // readiness check; we only need to subscribe to the value stream here.
+      // Subscribe before calling setNotifyValue so we never miss the
+      // initial notification the device sends in response to the CCCD write.
       dev.log('Subscribing to device→app characteristic', name: 'BleTransport');
       _notifySubscription = _txChar!.onValueReceived.listen(_onNotify);
-    } on Exception catch (e) {
+
+      // (Re-)enable notifications on this transport instance. Even if
+      // BleConnectionNotifier already called setNotifyValue, calling it again
+      // here guarantees the device receives a fresh CCCD write and emits a
+      // current-state notification — critical after app restart where the
+      // device may already have CCCD=1 and not send unsolicited updates.
+      try {
+        await _txChar!.setNotifyValue(true);
+        dev.log(
+          'Notifications (re-)enabled on device→app characteristic',
+          name: 'BleTransport',
+        );
+      } on Exception catch (e) {
+        // BleConnectionNotifier already handled bonding; if setNotifyValue
+        // fails here it is a transient error — the subscription is already
+        // live so future notifications will still arrive.
+        dev.log('setNotifyValue failed (non-fatal): $e', name: 'BleTransport');
+      }
+    } catch (e) {
+      // Catches both Exception and Error (e.g. StateError from firstWhere
+      // when the service UUID is not found in servicesList).
       dev.log('Init error: $e', name: 'BleTransport');
-      _controller.addError(e);
+      if (!_controller.isClosed) _controller.addError(e);
     }
   }
 
@@ -80,8 +98,9 @@ class BleCarTransport implements CarTransport {
     if (bytes.isEmpty) return;
     try {
       final msg = DeviceToApp.fromBuffer(bytes);
-      if (kDebugMode)
+      if (kDebugMode) {
         dev.log('Received ${bytes.length} bytes', name: 'BleTransport');
+      }
       if (!_controller.isClosed) _controller.add(msg);
     } on Exception catch (e) {
       dev.log('Malformed protobuf discarded: $e', name: 'BleTransport');
@@ -100,11 +119,12 @@ class BleCarTransport implements CarTransport {
     if (rx == null) return;
 
     final bytes = message.writeToBuffer();
-    if (kDebugMode)
+    if (kDebugMode) {
       dev.log(
         'Sending ${bytes.length} bytes (msgId: ${message.messageId})',
         name: 'BleTransport',
       );
+    }
 
     try {
       await rx.write(bytes, withoutResponse: false);

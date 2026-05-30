@@ -151,11 +151,12 @@ class MqttCarTransport implements CarTransport {
       if (bytes == null || bytes.isEmpty) continue;
       try {
         final msg = DeviceToApp.fromBuffer(bytes);
-        if (kDebugMode)
+        if (kDebugMode) {
           dev.log(
             'Decoded DeviceToApp (${bytes.length} bytes)',
             name: 'MqttTransport',
           );
+        }
         if (!_controller.isClosed) _controller.add(msg);
       } on Exception catch (e) {
         dev.log('Malformed protobuf discarded: $e', name: 'MqttTransport');

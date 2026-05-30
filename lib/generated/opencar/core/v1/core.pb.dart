@@ -175,6 +175,7 @@ enum DeviceToApp_Payload {
   stateUpdate, 
   commandResponse, 
   canDebugUpdate, 
+  systemEvent, 
   notSet
 }
 
@@ -188,6 +189,7 @@ class DeviceToApp extends $pb.GeneratedMessage {
     StateUpdate? stateUpdate,
     CommandResponse? commandResponse,
     CanDebugUpdate? canDebugUpdate,
+    $0.SystemEvent? systemEvent,
   }) {
     final $result = create();
     if (timestampMs != null) {
@@ -205,6 +207,9 @@ class DeviceToApp extends $pb.GeneratedMessage {
     if (canDebugUpdate != null) {
       $result.canDebugUpdate = canDebugUpdate;
     }
+    if (systemEvent != null) {
+      $result.systemEvent = systemEvent;
+    }
     return $result;
   }
   DeviceToApp._() : super();
@@ -215,15 +220,17 @@ class DeviceToApp extends $pb.GeneratedMessage {
     3 : DeviceToApp_Payload.stateUpdate,
     4 : DeviceToApp_Payload.commandResponse,
     5 : DeviceToApp_Payload.canDebugUpdate,
+    6 : DeviceToApp_Payload.systemEvent,
     0 : DeviceToApp_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeviceToApp', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..oo(0, [3, 4, 5])
+    ..oo(0, [3, 4, 5, 6])
     ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'timestampMs', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'platformId', $pb.PbFieldType.OU3)
     ..aOM<StateUpdate>(3, _omitFieldNames ? '' : 'stateUpdate', subBuilder: StateUpdate.create)
     ..aOM<CommandResponse>(4, _omitFieldNames ? '' : 'commandResponse', subBuilder: CommandResponse.create)
     ..aOM<CanDebugUpdate>(5, _omitFieldNames ? '' : 'canDebugUpdate', subBuilder: CanDebugUpdate.create)
+    ..aOM<$0.SystemEvent>(6, _omitFieldNames ? '' : 'systemEvent', subBuilder: $0.SystemEvent.create)
     ..hasRequiredFields = false
   ;
 
@@ -311,6 +318,19 @@ class DeviceToApp extends $pb.GeneratedMessage {
   void clearCanDebugUpdate() => clearField(5);
   @$pb.TagNumber(5)
   CanDebugUpdate ensureCanDebugUpdate() => $_ensure(4);
+
+  /// A firmware-initiated system event (no associated inbound command).
+  /// Sent over BLE only, e.g. to signal an intentional disconnect.
+  @$pb.TagNumber(6)
+  $0.SystemEvent get systemEvent => $_getN(5);
+  @$pb.TagNumber(6)
+  set systemEvent($0.SystemEvent v) { setField(6, v); }
+  @$pb.TagNumber(6)
+  $core.bool hasSystemEvent() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearSystemEvent() => clearField(6);
+  @$pb.TagNumber(6)
+  $0.SystemEvent ensureSystemEvent() => $_ensure(5);
 }
 
 /// This holds the state update data of the device, containing both the system

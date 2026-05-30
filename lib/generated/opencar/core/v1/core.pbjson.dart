@@ -64,6 +64,7 @@ const DeviceToApp$json = {
     {'1': 'state_update', '3': 3, '4': 1, '5': 11, '6': '.opencar.core.v1.StateUpdate', '9': 0, '10': 'stateUpdate'},
     {'1': 'command_response', '3': 4, '4': 1, '5': 11, '6': '.opencar.core.v1.CommandResponse', '9': 0, '10': 'commandResponse'},
     {'1': 'can_debug_update', '3': 5, '4': 1, '5': 11, '6': '.opencar.core.v1.CanDebugUpdate', '9': 0, '10': 'canDebugUpdate'},
+    {'1': 'system_event', '3': 6, '4': 1, '5': 11, '6': '.opencar.core.v1.SystemEvent', '9': 0, '10': 'systemEvent'},
   ],
   '8': [
     {'1': 'payload'},
@@ -77,7 +78,8 @@ final $typed_data.Uint8List deviceToAppDescriptor = $convert.base64Decode(
     'YXIuY29yZS52MS5TdGF0ZVVwZGF0ZUgAUgtzdGF0ZVVwZGF0ZRJNChBjb21tYW5kX3Jlc3Bvbn'
     'NlGAQgASgLMiAub3BlbmNhci5jb3JlLnYxLkNvbW1hbmRSZXNwb25zZUgAUg9jb21tYW5kUmVz'
     'cG9uc2USSwoQY2FuX2RlYnVnX3VwZGF0ZRgFIAEoCzIfLm9wZW5jYXIuY29yZS52MS5DYW5EZW'
-    'J1Z1VwZGF0ZUgAUg5jYW5EZWJ1Z1VwZGF0ZUIJCgdwYXlsb2Fk');
+    'J1Z1VwZGF0ZUgAUg5jYW5EZWJ1Z1VwZGF0ZRJBCgxzeXN0ZW1fZXZlbnQYBiABKAsyHC5vcGVu'
+    'Y2FyLmNvcmUudjEuU3lzdGVtRXZlbnRIAFILc3lzdGVtRXZlbnRCCQoHcGF5bG9hZA==');
 
 @$core.Deprecated('Use stateUpdateDescriptor instead')
 const StateUpdate$json = {

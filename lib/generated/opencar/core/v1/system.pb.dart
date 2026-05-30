@@ -705,6 +705,40 @@ class UpsertPairedPhoneCommand extends $pb.GeneratedMessage {
   void clearDeviceId() => clearField(1);
 }
 
+/// A firmware-initiated event pushed to the app with no associated inbound
+/// command. Delivered over the DeviceToApp BLE characteristic.
+class SystemEvent extends $pb.GeneratedMessage {
+  factory SystemEvent() => create();
+  SystemEvent._() : super();
+  factory SystemEvent.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SystemEvent.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'SystemEvent', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
+    ..hasRequiredFields = false
+  ;
+
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SystemEvent clone() => SystemEvent()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SystemEvent copyWith(void Function(SystemEvent) updates) => super.copyWith((message) => updates(message as SystemEvent)) as SystemEvent;
+
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SystemEvent create() => SystemEvent._();
+  SystemEvent createEmptyInstance() => create();
+  static $pb.PbList<SystemEvent> createRepeated() => $pb.PbList<SystemEvent>();
+  @$core.pragma('dart2js:noInline')
+  static SystemEvent getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SystemEvent>(create);
+  static SystemEvent? _defaultInstance;
+}
+
 
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
 const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
