@@ -229,7 +229,7 @@ class _PairingWizardScreenState extends ConsumerState<PairingWizardScreen> {
           // key mismatch after the Android pairing dialog is confirmed).
           // disconnectCompleter.future throws immediately once completed.
           await Future.any([
-            ble.writeCharacteristicWithResponse(rxChar, value: [0]),
+            ble.writeCharacteristicWithResponse(rxChar, value: []),
             disconnectCompleter.future,
           ]);
           bondConfirmed = true;
