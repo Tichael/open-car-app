@@ -108,7 +108,8 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
     // Fall back to empty defaults only on the very first build.
     // isAdvancedStateLive is always reset to false: the cached advanced state
     // must not be shown until the firmware confirms it over the new transport.
-    final base = _lastSnapshot ??
+    final base =
+        _lastSnapshot ??
         VehicleSnapshot(
           basicState: vehicle.decodeBasicState(const []),
           advancedState: vehicle.decodeAdvancedState(const []),
@@ -180,7 +181,9 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString('$_kStateCacheKeyPrefix${vehicle.platformName}');
+      final raw = prefs.getString(
+        '$_kStateCacheKeyPrefix${vehicle.platformName}',
+      );
       if (raw == null) return;
       final json = jsonDecode(raw) as Map<String, dynamic>;
       final basicState = vehicle.decodeBasicState(
@@ -222,8 +225,9 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
       final prefs = await SharedPreferences.getInstance();
       final json = <String, dynamic>{
         'basicStateBytes': base64Encode(snapshot.basicState.writeToBuffer()),
-        'advancedStateBytes':
-            base64Encode(snapshot.advancedState.writeToBuffer()),
+        'advancedStateBytes': base64Encode(
+          snapshot.advancedState.writeToBuffer(),
+        ),
         if (snapshot.system != null)
           'systemStateBytes': base64Encode(snapshot.system!.writeToBuffer()),
         if (snapshot.lastUpdated != null)

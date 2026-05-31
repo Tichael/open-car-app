@@ -213,8 +213,18 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
 String _formatTimestamp(DateTime dt) {
   final local = dt.toLocal();
   const months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
   final h = local.hour.toString().padLeft(2, '0');
   final m = local.minute.toString().padLeft(2, '0');
@@ -284,7 +294,8 @@ class _StateHeaderSuffixState extends State<_StateHeaderSuffix> {
   @override
   Widget build(BuildContext context) {
     final showTimestamp = _showTimestamp;
-    if (!widget.awaitingAdvanced && !showTimestamp) return const SizedBox.shrink();
+    if (!widget.awaitingAdvanced && !showTimestamp)
+      return const SizedBox.shrink();
 
     return Row(
       mainAxisSize: MainAxisSize.min,
