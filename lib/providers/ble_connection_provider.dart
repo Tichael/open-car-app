@@ -171,6 +171,23 @@ class BleConnectionNotifier extends Notifier<BleConnectionState> {
       await ble.requestMtu(deviceId: remoteId, mtu: 244);
       dev.log('MTU negotiated for $remoteId', name: 'BleConnection');
 
+      // Clear Android's cached GATT profile before service discovery.
+      // On bonded devices Android reuses the cached profile from the previous
+      // connection, which returns the characteristic's descriptors list as
+      // empty. flutter_reactive_ble then falls back to COMPAT notification
+      // mode (setCharacteristicNotification only, no CCCD write), so the
+      // firmware never receives the [0x01, 0x00] that enables notifications.
+      // Clearing the cache forces a fresh over-the-air discovery that includes
+      // the CCCD descriptor, restoring DEFAULT mode and working notifications.
+      try {
+        await ble.clearGattCache(remoteId);
+        dev.log('GATT cache cleared for $remoteId', name: 'BleConnection');
+      } on Exception catch (e) {
+        // Non-fatal: some Android versions don't expose the hidden refresh()
+        // API. Log and continue — notifications may not work on those devices.
+        dev.log('clearGattCache failed (non-fatal): $e', name: 'BleConnection');
+      }
+
       // Discover services and characteristics.
       await ble.discoverAllServices(remoteId);
       dev.log('Services discovered for $remoteId', name: 'BleConnection');

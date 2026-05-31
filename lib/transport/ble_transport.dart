@@ -79,7 +79,10 @@ class BleCarTransport implements CarTransport {
     try {
       await _ble.writeCharacteristicWithResponse(_rxChar, value: bytes);
     } on Exception catch (e) {
-      dev.log('Write failed: $e — retrying after short delay', name: 'BleTransport');
+      dev.log(
+        'Write failed: $e — retrying after short delay',
+        name: 'BleTransport',
+      );
       // The OS may need a moment to complete bonding before the write
       // succeeds. One retry after a brief pause is sufficient for the
       // firmware-initiated bonding window.
