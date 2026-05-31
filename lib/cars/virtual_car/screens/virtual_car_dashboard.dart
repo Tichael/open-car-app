@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_car_app/cars/virtual_car/constants.g.dart';
@@ -18,6 +20,8 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
         transportType == TransportType.ble ||
         transportType == TransportType.stub ||
         transportType == TransportType.http;
+    final showAdvanced = isBle && snapshot.isAdvancedStateLive;
+    final awaitingAdvanced = isBle && !snapshot.isAdvancedStateLive;
 
     final basic = snapshot.basicState as BasicState;
     final advanced = snapshot.advancedState as AdvancedState;
@@ -86,7 +90,17 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           // ── Basic state ─────────────────────────────────────────────────
-          _SectionHeader(title: 'State'),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(child: _SectionHeader(title: 'State')),
+              _StateHeaderSuffix(
+                lastUpdated: snapshot.lastUpdated,
+                awaitingAdvanced: awaitingAdvanced,
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           GridView.count(
             crossAxisCount: 2,
@@ -109,8 +123,8 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
             ],
           ),
 
-          // ── Advanced state (BLE only) ────────────────────────────────────
-          if (isBle) ...[
+          // ── Advanced state (BLE only, shown once live data arrives) ────────
+          if (showAdvanced) ...[
             const SizedBox(height: 16),
             _SectionHeader(title: 'Advanced State'),
             const SizedBox(height: 8),
@@ -153,8 +167,8 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
             },
           ),
 
-          // ── Advanced controls (BLE only) ─────────────────────────────────
-          if (isBle) ...[
+          // ── Advanced controls (BLE only, shown once live data arrives) ────
+          if (showAdvanced) ...[
             const SizedBox(height: 16),
             _SectionHeader(title: 'Advanced Controls'),
             const SizedBox(height: 8),
@@ -194,6 +208,107 @@ class VirtualCarDashboardScreen extends ConsumerWidget {
 }
 
 // ── Widgets ──────────────────────────────────────────────────────────────────
+
+/// Formats a UTC [DateTime] as a local-time string, e.g. "31 May, 14:23:05".
+String _formatTimestamp(DateTime dt) {
+  final local = dt.toLocal();
+  const months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+  final h = local.hour.toString().padLeft(2, '0');
+  final m = local.minute.toString().padLeft(2, '0');
+  final s = local.second.toString().padLeft(2, '0');
+  return '${local.day} ${months[local.month - 1]}, $h:$m:$s';
+}
+
+/// Displays a spinner and/or "Updated …" timestamp to the right of a section
+/// header. The timestamp is hidden while it is less than [_kStaleThreshold]
+/// old — there is no value in showing it for very recent data. A one-shot
+/// [Timer] fires exactly when the threshold is crossed so the text appears
+/// without requiring a new state update to trigger a rebuild.
+class _StateHeaderSuffix extends StatefulWidget {
+  final DateTime? lastUpdated;
+  final bool awaitingAdvanced;
+
+  const _StateHeaderSuffix({
+    required this.lastUpdated,
+    required this.awaitingAdvanced,
+  });
+
+  @override
+  State<_StateHeaderSuffix> createState() => _StateHeaderSuffixState();
+}
+
+class _StateHeaderSuffixState extends State<_StateHeaderSuffix> {
+  static const _kStaleThreshold = Duration(seconds: 30);
+  Timer? _revealTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleRevealIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(_StateHeaderSuffix old) {
+    super.didUpdateWidget(old);
+    if (widget.lastUpdated != old.lastUpdated) {
+      _revealTimer?.cancel();
+      _scheduleRevealIfNeeded();
+    }
+  }
+
+  @override
+  void dispose() {
+    _revealTimer?.cancel();
+    super.dispose();
+  }
+
+  void _scheduleRevealIfNeeded() {
+    final ts = widget.lastUpdated;
+    if (ts == null) return;
+    final age = DateTime.now().difference(ts);
+    if (age >= _kStaleThreshold) return; // already stale — show immediately
+    _revealTimer = Timer(_kStaleThreshold - age, () {
+      if (mounted) setState(() {});
+    });
+  }
+
+  bool get _showTimestamp {
+    final ts = widget.lastUpdated;
+    if (ts == null) return false;
+    return DateTime.now().difference(ts) >= _kStaleThreshold;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final showTimestamp = _showTimestamp;
+    if (!widget.awaitingAdvanced && !showTimestamp) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        if (widget.awaitingAdvanced)
+          const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(strokeWidth: 1.5),
+          ),
+        if (showTimestamp) ...[
+          if (widget.awaitingAdvanced) const SizedBox(width: 6),
+          Text(
+            'Updated ${_formatTimestamp(widget.lastUpdated!)}',
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
 
 class _SectionHeader extends StatelessWidget {
   final String title;

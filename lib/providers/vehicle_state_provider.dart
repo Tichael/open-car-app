@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as dev;
 
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:protobuf/protobuf.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:open_car_app/generated/opencar/core/v1/core.pb.dart';
 import 'package:open_car_app/generated/opencar/core/v1/system.pb.dart';
 import 'package:open_car_app/providers/ble_source_device_id_provider.dart';
@@ -25,21 +27,41 @@ class VehicleSnapshot {
   /// Null until the first BLE state update is received.
   final SystemState? system;
 
+  /// When this snapshot was last populated from a live device message.
+  /// Null if only the persisted cache has been restored (no live update yet
+  /// this session) — though the cached value itself carries the timestamp.
+  final DateTime? lastUpdated;
+
+  /// True once [advancedState] has been received over the current live
+  /// transport session. Reset to false on every transport switch.
+  ///
+  /// Vehicle screens should gate their advanced state and advanced controls
+  /// sections on this flag (in addition to checking the transport type)
+  /// so that stale cached values are never shown or acted on before the
+  /// firmware has sent a fresh update.
+  final bool isAdvancedStateLive;
+
   const VehicleSnapshot({
     required this.basicState,
     required this.advancedState,
     this.system,
+    this.lastUpdated,
+    this.isAdvancedStateLive = false,
   });
 
   VehicleSnapshot copyWith({
     GeneratedMessage? basicState,
     GeneratedMessage? advancedState,
     SystemState? system,
+    DateTime? lastUpdated,
+    bool? isAdvancedStateLive,
   }) {
     return VehicleSnapshot(
       basicState: basicState ?? this.basicState,
       advancedState: advancedState ?? this.advancedState,
       system: system ?? this.system,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+      isAdvancedStateLive: isAdvancedStateLive ?? this.isAdvancedStateLive,
     );
   }
 }
@@ -50,10 +72,22 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
   // Cached across rebuilds so teardown races (vehicle → null before
   // this notifier is disposed) don't crash build().
   VehicleDefinition? _vehicle;
+  // Preserved across transport switches so the UI doesn't flash blank
+  // while waiting for the first state update on the new transport.
+  VehicleSnapshot? _lastSnapshot;
+  // Used to discard async cache loads that complete after a vehicle change.
+  int _buildGeneration = 0;
+
+  static const _kStateCacheKeyPrefix = 'vehicle_state_';
 
   @override
   VehicleSnapshot build() {
     final latestVehicle = ref.read(selectedVehicleProvider);
+    // Discard stale cache when the paired vehicle changes.
+    if (latestVehicle != null &&
+        latestVehicle.platformName != _vehicle?.platformName) {
+      _lastSnapshot = null;
+    }
     if (latestVehicle != null) _vehicle = latestVehicle;
     final vehicle = _vehicle!;
     final transport = ref.watch(carTransportProvider);
@@ -61,12 +95,25 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
     _subscription = transport.messages.listen(_onMessage);
     ref.onDispose(() => _subscription?.cancel());
 
-    // Initialise with empty (all-default) instances of the vehicle's proto types
-    // so that the vehicle's screen can safely cast without a null check.
-    return VehicleSnapshot(
-      basicState: vehicle.decodeBasicState(const []),
-      advancedState: vehicle.decodeAdvancedState(const []),
-    );
+    // On cold start (no in-memory cache yet) kick off an async restore
+    // from SharedPreferences. A generation counter ensures a late-arriving
+    // load from a previous vehicle doesn't overwrite a newer one.
+    final generation = ++_buildGeneration;
+    if (_lastSnapshot == null) {
+      _loadCachedState(vehicle, generation);
+    }
+
+    // Restore the last known state on transport switches so the UI doesn't
+    // flash blank while waiting for the first update on the new transport.
+    // Fall back to empty defaults only on the very first build.
+    // isAdvancedStateLive is always reset to false: the cached advanced state
+    // must not be shown until the firmware confirms it over the new transport.
+    final base = _lastSnapshot ??
+        VehicleSnapshot(
+          basicState: vehicle.decodeBasicState(const []),
+          advancedState: vehicle.decodeAdvancedState(const []),
+        );
+    return base.copyWith(isAdvancedStateLive: false);
   }
 
   void _onMessage(DeviceToApp msg) {
@@ -106,7 +153,10 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
         final merged = vehicle.decodeAdvancedState(const [])
           ..mergeFromMessage(current.advancedState)
           ..mergeFromBuffer(vs.advancedStateBytes);
-        current = current.copyWith(advancedState: merged);
+        current = current.copyWith(
+          advancedState: merged,
+          isAdvancedStateLive: true,
+        );
       }
     }
 
@@ -117,7 +167,75 @@ class VehicleStateNotifier extends Notifier<VehicleSnapshot> {
       current = current.copyWith(system: merged);
     }
 
+    current = current.copyWith(lastUpdated: DateTime.now());
+    // Persist isAdvancedStateLive=false so a restored cache never starts live.
+    _lastSnapshot = current;
     state = current;
+    _saveCachedState(current, ref.read(selectedVehicleProvider)!);
+  }
+
+  Future<void> _loadCachedState(
+    VehicleDefinition vehicle,
+    int generation,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('$_kStateCacheKeyPrefix${vehicle.platformName}');
+      if (raw == null) return;
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final basicState = vehicle.decodeBasicState(
+        base64Decode(json['basicStateBytes'] as String),
+      );
+      final advancedState = vehicle.decodeAdvancedState(
+        base64Decode(json['advancedStateBytes'] as String),
+      );
+      final systemBytesRaw = json['systemStateBytes'] as String?;
+      final system = systemBytesRaw != null
+          ? (SystemState()..mergeFromBuffer(base64Decode(systemBytesRaw)))
+          : null;
+      final lastUpdated = DateTime.tryParse(
+        (json['lastUpdated'] as String?) ?? '',
+      );
+      // Only apply if no live update arrived first and the vehicle hasn't changed.
+      if (_lastSnapshot != null || _buildGeneration != generation) return;
+      _lastSnapshot = VehicleSnapshot(
+        basicState: basicState,
+        advancedState: advancedState,
+        system: system,
+        lastUpdated: lastUpdated,
+      );
+      try {
+        state = _lastSnapshot!;
+      } on StateError {
+        // Provider disposed before the async load completed.
+      }
+    } catch (e) {
+      dev.log('Failed to restore cached state: $e', name: 'VehicleState');
+    }
+  }
+
+  Future<void> _saveCachedState(
+    VehicleSnapshot snapshot,
+    VehicleDefinition vehicle,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final json = <String, dynamic>{
+        'basicStateBytes': base64Encode(snapshot.basicState.writeToBuffer()),
+        'advancedStateBytes':
+            base64Encode(snapshot.advancedState.writeToBuffer()),
+        if (snapshot.system != null)
+          'systemStateBytes': base64Encode(snapshot.system!.writeToBuffer()),
+        if (snapshot.lastUpdated != null)
+          'lastUpdated': snapshot.lastUpdated!.toUtc().toIso8601String(),
+      };
+      await prefs.setString(
+        '$_kStateCacheKeyPrefix${vehicle.platformName}',
+        jsonEncode(json),
+      );
+    } catch (e) {
+      dev.log('Failed to persist state cache: $e', name: 'VehicleState');
+    }
   }
 
   /// Send a serialised basic command for the active vehicle.
