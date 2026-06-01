@@ -17,9 +17,33 @@ import 'dart:typed_data' as $typed_data;
 const BasicState$json = {
   '1': 'BasicState',
   '2': [
-    {'1': 'odometer', '3': 1, '4': 1, '5': 13, '9': 0, '10': 'odometer', '17': true},
-    {'1': 'is_driving', '3': 2, '4': 1, '5': 8, '9': 1, '10': 'isDriving', '17': true},
-    {'1': 'are_doors_locked', '3': 3, '4': 1, '5': 8, '9': 2, '10': 'areDoorsLocked', '17': true},
+    {
+      '1': 'odometer',
+      '3': 1,
+      '4': 1,
+      '5': 13,
+      '9': 0,
+      '10': 'odometer',
+      '17': true
+    },
+    {
+      '1': 'is_driving',
+      '3': 2,
+      '4': 1,
+      '5': 8,
+      '9': 1,
+      '10': 'isDriving',
+      '17': true
+    },
+    {
+      '1': 'are_doors_locked',
+      '3': 3,
+      '4': 1,
+      '5': 8,
+      '9': 2,
+      '10': 'areDoorsLocked',
+      '17': true
+    },
   ],
   '8': [
     {'1': '_odometer'},
@@ -40,8 +64,25 @@ const AdvancedState$json = {
   '1': 'AdvancedState',
   '2': [
     {'1': 'speed', '3': 1, '4': 1, '5': 5, '9': 0, '10': 'speed', '17': true},
-    {'1': 'gear', '3': 2, '4': 1, '5': 14, '6': '.opencar.cars.virtual_car.v1.AdvancedState.Gear', '9': 1, '10': 'gear', '17': true},
-    {'1': 'custom_state1', '3': 3, '4': 1, '5': 8, '9': 2, '10': 'customState1', '17': true},
+    {
+      '1': 'gear',
+      '3': 2,
+      '4': 1,
+      '5': 14,
+      '6': '.opencar.cars.virtual_car.v1.AdvancedState.Gear',
+      '9': 1,
+      '10': 'gear',
+      '17': true
+    },
+    {
+      '1': 'custom_state1',
+      '3': 3,
+      '4': 1,
+      '5': 8,
+      '9': 2,
+      '10': 'customState1',
+      '17': true
+    },
   ],
   '4': [AdvancedState_Gear$json],
   '8': [
@@ -76,7 +117,15 @@ final $typed_data.Uint8List advancedStateDescriptor = $convert.base64Decode(
 const BasicCommand$json = {
   '1': 'BasicCommand',
   '2': [
-    {'1': 'door_lock', '3': 1, '4': 1, '5': 11, '6': '.opencar.cars.virtual_car.v1.DoorLockCommand', '9': 0, '10': 'doorLock'},
+    {
+      '1': 'door_lock',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.cars.virtual_car.v1.DoorLockCommand',
+      '9': 0,
+      '10': 'doorLock'
+    },
   ],
   '8': [
     {'1': 'action'},
@@ -92,7 +141,15 @@ final $typed_data.Uint8List basicCommandDescriptor = $convert.base64Decode(
 const AdvancedCommand$json = {
   '1': 'AdvancedCommand',
   '2': [
-    {'1': 'toggle_custom_state1', '3': 1, '4': 1, '5': 11, '6': '.opencar.cars.virtual_car.v1.ToggleCustomState1Command', '9': 0, '10': 'toggleCustomState1'},
+    {
+      '1': 'toggle_custom_state1',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.cars.virtual_car.v1.ToggleCustomState1Command',
+      '9': 0,
+      '10': 'toggleCustomState1'
+    },
   ],
   '8': [
     {'1': 'action'},
@@ -114,8 +171,8 @@ const DoorLockCommand$json = {
 };
 
 /// Descriptor for `DoorLockCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List doorLockCommandDescriptor = $convert.base64Decode(
-    'Cg9Eb29yTG9ja0NvbW1hbmQSEgoEbG9jaxgBIAEoCFIEbG9jaw==');
+final $typed_data.Uint8List doorLockCommandDescriptor = $convert
+    .base64Decode('Cg9Eb29yTG9ja0NvbW1hbmQSEgoEbG9jaxgBIAEoCFIEbG9jaw==');
 
 @$core.Deprecated('Use toggleCustomState1CommandDescriptor instead')
 const ToggleCustomState1Command$json = {
@@ -123,6 +180,5 @@ const ToggleCustomState1Command$json = {
 };
 
 /// Descriptor for `ToggleCustomState1Command`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List toggleCustomState1CommandDescriptor = $convert.base64Decode(
-    'ChlUb2dnbGVDdXN0b21TdGF0ZTFDb21tYW5k');
-
+final $typed_data.Uint8List toggleCustomState1CommandDescriptor =
+    $convert.base64Decode('ChlUb2dnbGVDdXN0b21TdGF0ZTFDb21tYW5k');

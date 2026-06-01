@@ -59,7 +59,8 @@ class MqttConfigBuilder implements Builder {
       ..writeln('const String kDebugServerHost = ${jsonEncode(debugHost)};')
       ..writeln('const int kDebugServerPort = $debugPort;')
       ..writeln(
-          'const int kDebugServerPollingIntervalMs = $debugPollingIntervalMs;');
+        'const int kDebugServerPollingIntervalMs = $debugPollingIntervalMs;',
+      );
 
     await buildStep.writeAsString(outputId, buffer.toString());
   }

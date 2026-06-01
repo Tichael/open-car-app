@@ -294,8 +294,9 @@ class _StateHeaderSuffixState extends State<_StateHeaderSuffix> {
   @override
   Widget build(BuildContext context) {
     final showTimestamp = _showTimestamp;
-    if (!widget.awaitingAdvanced && !showTimestamp)
+    if (!widget.awaitingAdvanced && !showTimestamp) {
       return const SizedBox.shrink();
+    }
 
     return Row(
       mainAxisSize: MainAxisSize.min,

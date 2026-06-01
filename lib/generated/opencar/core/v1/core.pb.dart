@@ -20,10 +20,10 @@ import 'system.pb.dart' as $0;
 export 'core.pbenum.dart';
 
 enum AppToDevice_Payload {
-  systemCommand, 
-  basicCommandBytes, 
-  advancedCommandBytes, 
-  heartbeat, 
+  systemCommand,
+  basicCommandBytes,
+  advancedCommandBytes,
+  heartbeat,
   notSet
 }
 
@@ -64,38 +64,52 @@ class AppToDevice extends $pb.GeneratedMessage {
     return $result;
   }
   AppToDevice._() : super();
-  factory AppToDevice.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory AppToDevice.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory AppToDevice.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory AppToDevice.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static const $core.Map<$core.int, AppToDevice_Payload> _AppToDevice_PayloadByTag = {
-    3 : AppToDevice_Payload.systemCommand,
-    4 : AppToDevice_Payload.basicCommandBytes,
-    5 : AppToDevice_Payload.advancedCommandBytes,
-    7 : AppToDevice_Payload.heartbeat,
-    0 : AppToDevice_Payload.notSet
+  static const $core.Map<$core.int, AppToDevice_Payload>
+      _AppToDevice_PayloadByTag = {
+    3: AppToDevice_Payload.systemCommand,
+    4: AppToDevice_Payload.basicCommandBytes,
+    5: AppToDevice_Payload.advancedCommandBytes,
+    7: AppToDevice_Payload.heartbeat,
+    0: AppToDevice_Payload.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AppToDevice', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AppToDevice',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
     ..oo(0, [3, 4, 5, 7])
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'platformId', $pb.PbFieldType.OU3)
-    ..aOM<$0.SystemCommand>(3, _omitFieldNames ? '' : 'systemCommand', subBuilder: $0.SystemCommand.create)
-    ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'basicCommandBytes', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(5, _omitFieldNames ? '' : 'advancedCommandBytes', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(6, _omitFieldNames ? '' : 'sourceDeviceId', $pb.PbFieldType.OY)
+    ..aOM<$0.SystemCommand>(3, _omitFieldNames ? '' : 'systemCommand',
+        subBuilder: $0.SystemCommand.create)
+    ..a<$core.List<$core.int>>(
+        4, _omitFieldNames ? '' : 'basicCommandBytes', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        5, _omitFieldNames ? '' : 'advancedCommandBytes', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        6, _omitFieldNames ? '' : 'sourceDeviceId', $pb.PbFieldType.OY)
     ..aOB(7, _omitFieldNames ? '' : 'heartbeat')
-    ..hasRequiredFields = false
-  ;
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   AppToDevice clone() => AppToDevice()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  AppToDevice copyWith(void Function(AppToDevice) updates) => super.copyWith((message) => updates(message as AppToDevice)) as AppToDevice;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  AppToDevice copyWith(void Function(AppToDevice) updates) =>
+      super.copyWith((message) => updates(message as AppToDevice))
+          as AppToDevice;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -104,10 +118,12 @@ class AppToDevice extends $pb.GeneratedMessage {
   AppToDevice createEmptyInstance() => create();
   static $pb.PbList<AppToDevice> createRepeated() => $pb.PbList<AppToDevice>();
   @$core.pragma('dart2js:noInline')
-  static AppToDevice getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<AppToDevice>(create);
+  static AppToDevice getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AppToDevice>(create);
   static AppToDevice? _defaultInstance;
 
-  AppToDevice_Payload whichPayload() => _AppToDevice_PayloadByTag[$_whichOneof(0)]!;
+  AppToDevice_Payload whichPayload() =>
+      _AppToDevice_PayloadByTag[$_whichOneof(0)]!;
   void clearPayload() => clearField($_whichOneof(0));
 
   /// A unique identifier for this specific message, which can be used for
@@ -115,7 +131,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $fixnum.Int64 get messageId => $_getI64(0);
   @$pb.TagNumber(1)
-  set messageId($fixnum.Int64 v) { $_setInt64(0, v); }
+  set messageId($fixnum.Int64 v) {
+    $_setInt64(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasMessageId() => $_has(0);
   @$pb.TagNumber(1)
@@ -126,7 +145,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.int get platformId => $_getIZ(1);
   @$pb.TagNumber(2)
-  set platformId($core.int v) { $_setUnsignedInt32(1, v); }
+  set platformId($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasPlatformId() => $_has(1);
   @$pb.TagNumber(2)
@@ -136,7 +158,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $0.SystemCommand get systemCommand => $_getN(2);
   @$pb.TagNumber(3)
-  set systemCommand($0.SystemCommand v) { setField(3, v); }
+  set systemCommand($0.SystemCommand v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasSystemCommand() => $_has(2);
   @$pb.TagNumber(3)
@@ -149,7 +174,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.List<$core.int> get basicCommandBytes => $_getN(3);
   @$pb.TagNumber(4)
-  set basicCommandBytes($core.List<$core.int> v) { $_setBytes(3, v); }
+  set basicCommandBytes($core.List<$core.int> v) {
+    $_setBytes(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasBasicCommandBytes() => $_has(3);
   @$pb.TagNumber(4)
@@ -160,7 +188,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.List<$core.int> get advancedCommandBytes => $_getN(4);
   @$pb.TagNumber(5)
-  set advancedCommandBytes($core.List<$core.int> v) { $_setBytes(4, v); }
+  set advancedCommandBytes($core.List<$core.int> v) {
+    $_setBytes(4, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasAdvancedCommandBytes() => $_has(4);
   @$pb.TagNumber(5)
@@ -171,7 +202,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.List<$core.int> get sourceDeviceId => $_getN(5);
   @$pb.TagNumber(6)
-  set sourceDeviceId($core.List<$core.int> v) { $_setBytes(5, v); }
+  set sourceDeviceId($core.List<$core.int> v) {
+    $_setBytes(5, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasSourceDeviceId() => $_has(5);
   @$pb.TagNumber(6)
@@ -183,7 +217,10 @@ class AppToDevice extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   $core.bool get heartbeat => $_getBF(6);
   @$pb.TagNumber(7)
-  set heartbeat($core.bool v) { $_setBool(6, v); }
+  set heartbeat($core.bool v) {
+    $_setBool(6, v);
+  }
+
   @$pb.TagNumber(7)
   $core.bool hasHeartbeat() => $_has(6);
   @$pb.TagNumber(7)
@@ -191,10 +228,10 @@ class AppToDevice extends $pb.GeneratedMessage {
 }
 
 enum DeviceToApp_Payload {
-  stateUpdate, 
-  commandResponse, 
-  canDebugUpdate, 
-  systemEvent, 
+  stateUpdate,
+  commandResponse,
+  canDebugUpdate,
+  systemEvent,
   notSet
 }
 
@@ -232,37 +269,51 @@ class DeviceToApp extends $pb.GeneratedMessage {
     return $result;
   }
   DeviceToApp._() : super();
-  factory DeviceToApp.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory DeviceToApp.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory DeviceToApp.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory DeviceToApp.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static const $core.Map<$core.int, DeviceToApp_Payload> _DeviceToApp_PayloadByTag = {
-    3 : DeviceToApp_Payload.stateUpdate,
-    4 : DeviceToApp_Payload.commandResponse,
-    5 : DeviceToApp_Payload.canDebugUpdate,
-    6 : DeviceToApp_Payload.systemEvent,
-    0 : DeviceToApp_Payload.notSet
+  static const $core.Map<$core.int, DeviceToApp_Payload>
+      _DeviceToApp_PayloadByTag = {
+    3: DeviceToApp_Payload.stateUpdate,
+    4: DeviceToApp_Payload.commandResponse,
+    5: DeviceToApp_Payload.canDebugUpdate,
+    6: DeviceToApp_Payload.systemEvent,
+    0: DeviceToApp_Payload.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'DeviceToApp', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DeviceToApp',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
     ..oo(0, [3, 4, 5, 6])
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'timestampMs', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'timestampMs', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'platformId', $pb.PbFieldType.OU3)
-    ..aOM<StateUpdate>(3, _omitFieldNames ? '' : 'stateUpdate', subBuilder: StateUpdate.create)
-    ..aOM<CommandResponse>(4, _omitFieldNames ? '' : 'commandResponse', subBuilder: CommandResponse.create)
-    ..aOM<CanDebugUpdate>(5, _omitFieldNames ? '' : 'canDebugUpdate', subBuilder: CanDebugUpdate.create)
-    ..aOM<$0.SystemEvent>(6, _omitFieldNames ? '' : 'systemEvent', subBuilder: $0.SystemEvent.create)
-    ..hasRequiredFields = false
-  ;
+    ..aOM<StateUpdate>(3, _omitFieldNames ? '' : 'stateUpdate',
+        subBuilder: StateUpdate.create)
+    ..aOM<CommandResponse>(4, _omitFieldNames ? '' : 'commandResponse',
+        subBuilder: CommandResponse.create)
+    ..aOM<CanDebugUpdate>(5, _omitFieldNames ? '' : 'canDebugUpdate',
+        subBuilder: CanDebugUpdate.create)
+    ..aOM<$0.SystemEvent>(6, _omitFieldNames ? '' : 'systemEvent',
+        subBuilder: $0.SystemEvent.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   DeviceToApp clone() => DeviceToApp()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  DeviceToApp copyWith(void Function(DeviceToApp) updates) => super.copyWith((message) => updates(message as DeviceToApp)) as DeviceToApp;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  DeviceToApp copyWith(void Function(DeviceToApp) updates) =>
+      super.copyWith((message) => updates(message as DeviceToApp))
+          as DeviceToApp;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -271,10 +322,12 @@ class DeviceToApp extends $pb.GeneratedMessage {
   DeviceToApp createEmptyInstance() => create();
   static $pb.PbList<DeviceToApp> createRepeated() => $pb.PbList<DeviceToApp>();
   @$core.pragma('dart2js:noInline')
-  static DeviceToApp getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<DeviceToApp>(create);
+  static DeviceToApp getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DeviceToApp>(create);
   static DeviceToApp? _defaultInstance;
 
-  DeviceToApp_Payload whichPayload() => _DeviceToApp_PayloadByTag[$_whichOneof(0)]!;
+  DeviceToApp_Payload whichPayload() =>
+      _DeviceToApp_PayloadByTag[$_whichOneof(0)]!;
   void clearPayload() => clearField($_whichOneof(0));
 
   /// The timestamp when the message was created, as a Unix timestamp in
@@ -282,7 +335,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $fixnum.Int64 get timestampMs => $_getI64(0);
   @$pb.TagNumber(1)
-  set timestampMs($fixnum.Int64 v) { $_setInt64(0, v); }
+  set timestampMs($fixnum.Int64 v) {
+    $_setInt64(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasTimestampMs() => $_has(0);
   @$pb.TagNumber(1)
@@ -293,7 +349,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.int get platformId => $_getIZ(1);
   @$pb.TagNumber(2)
-  set platformId($core.int v) { $_setUnsignedInt32(1, v); }
+  set platformId($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasPlatformId() => $_has(1);
   @$pb.TagNumber(2)
@@ -303,7 +362,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   StateUpdate get stateUpdate => $_getN(2);
   @$pb.TagNumber(3)
-  set stateUpdate(StateUpdate v) { setField(3, v); }
+  set stateUpdate(StateUpdate v) {
+    setField(3, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasStateUpdate() => $_has(2);
   @$pb.TagNumber(3)
@@ -316,7 +378,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   CommandResponse get commandResponse => $_getN(3);
   @$pb.TagNumber(4)
-  set commandResponse(CommandResponse v) { setField(4, v); }
+  set commandResponse(CommandResponse v) {
+    setField(4, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasCommandResponse() => $_has(3);
   @$pb.TagNumber(4)
@@ -330,7 +395,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   CanDebugUpdate get canDebugUpdate => $_getN(4);
   @$pb.TagNumber(5)
-  set canDebugUpdate(CanDebugUpdate v) { setField(5, v); }
+  set canDebugUpdate(CanDebugUpdate v) {
+    setField(5, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasCanDebugUpdate() => $_has(4);
   @$pb.TagNumber(5)
@@ -343,7 +411,10 @@ class DeviceToApp extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $0.SystemEvent get systemEvent => $_getN(5);
   @$pb.TagNumber(6)
-  set systemEvent($0.SystemEvent v) { setField(6, v); }
+  set systemEvent($0.SystemEvent v) {
+    setField(6, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasSystemEvent() => $_has(5);
   @$pb.TagNumber(6)
@@ -369,25 +440,34 @@ class StateUpdate extends $pb.GeneratedMessage {
     return $result;
   }
   StateUpdate._() : super();
-  factory StateUpdate.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory StateUpdate.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory StateUpdate.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory StateUpdate.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'StateUpdate', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..aOM<$0.SystemState>(1, _omitFieldNames ? '' : 'systemState', subBuilder: $0.SystemState.create)
-    ..aOM<VehicleState>(2, _omitFieldNames ? '' : 'vehicleState', subBuilder: VehicleState.create)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StateUpdate',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
+    ..aOM<$0.SystemState>(1, _omitFieldNames ? '' : 'systemState',
+        subBuilder: $0.SystemState.create)
+    ..aOM<VehicleState>(2, _omitFieldNames ? '' : 'vehicleState',
+        subBuilder: VehicleState.create)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   StateUpdate clone() => StateUpdate()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  StateUpdate copyWith(void Function(StateUpdate) updates) => super.copyWith((message) => updates(message as StateUpdate)) as StateUpdate;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  StateUpdate copyWith(void Function(StateUpdate) updates) =>
+      super.copyWith((message) => updates(message as StateUpdate))
+          as StateUpdate;
 
   $pb.BuilderInfo get info_ => _i;
 
@@ -396,14 +476,18 @@ class StateUpdate extends $pb.GeneratedMessage {
   StateUpdate createEmptyInstance() => create();
   static $pb.PbList<StateUpdate> createRepeated() => $pb.PbList<StateUpdate>();
   @$core.pragma('dart2js:noInline')
-  static StateUpdate getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<StateUpdate>(create);
+  static StateUpdate getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StateUpdate>(create);
   static StateUpdate? _defaultInstance;
 
   /// System state, only transmitted over BLE.
   @$pb.TagNumber(1)
   $0.SystemState get systemState => $_getN(0);
   @$pb.TagNumber(1)
-  set systemState($0.SystemState v) { setField(1, v); }
+  set systemState($0.SystemState v) {
+    setField(1, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasSystemState() => $_has(0);
   @$pb.TagNumber(1)
@@ -415,7 +499,10 @@ class StateUpdate extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   VehicleState get vehicleState => $_getN(1);
   @$pb.TagNumber(2)
-  set vehicleState(VehicleState v) { setField(2, v); }
+  set vehicleState(VehicleState v) {
+    setField(2, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasVehicleState() => $_has(1);
   @$pb.TagNumber(2)
@@ -440,41 +527,55 @@ class VehicleState extends $pb.GeneratedMessage {
     return $result;
   }
   VehicleState._() : super();
-  factory VehicleState.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory VehicleState.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory VehicleState.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory VehicleState.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'VehicleState', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..a<$core.List<$core.int>>(1, _omitFieldNames ? '' : 'basicStateBytes', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(2, _omitFieldNames ? '' : 'advancedStateBytes', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'VehicleState',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(
+        1, _omitFieldNames ? '' : 'basicStateBytes', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'advancedStateBytes', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   VehicleState clone() => VehicleState()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  VehicleState copyWith(void Function(VehicleState) updates) => super.copyWith((message) => updates(message as VehicleState)) as VehicleState;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  VehicleState copyWith(void Function(VehicleState) updates) =>
+      super.copyWith((message) => updates(message as VehicleState))
+          as VehicleState;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static VehicleState create() => VehicleState._();
   VehicleState createEmptyInstance() => create();
-  static $pb.PbList<VehicleState> createRepeated() => $pb.PbList<VehicleState>();
+  static $pb.PbList<VehicleState> createRepeated() =>
+      $pb.PbList<VehicleState>();
   @$core.pragma('dart2js:noInline')
-  static VehicleState getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<VehicleState>(create);
+  static VehicleState getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<VehicleState>(create);
   static VehicleState? _defaultInstance;
 
   /// The basic vehicle specific state bytes, sent to all connections.
   @$pb.TagNumber(1)
   $core.List<$core.int> get basicStateBytes => $_getN(0);
   @$pb.TagNumber(1)
-  set basicStateBytes($core.List<$core.int> v) { $_setBytes(0, v); }
+  set basicStateBytes($core.List<$core.int> v) {
+    $_setBytes(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasBasicStateBytes() => $_has(0);
   @$pb.TagNumber(1)
@@ -484,7 +585,10 @@ class VehicleState extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.List<$core.int> get advancedStateBytes => $_getN(1);
   @$pb.TagNumber(2)
-  set advancedStateBytes($core.List<$core.int> v) { $_setBytes(1, v); }
+  set advancedStateBytes($core.List<$core.int> v) {
+    $_setBytes(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasAdvancedStateBytes() => $_has(1);
   @$pb.TagNumber(2)
@@ -492,8 +596,8 @@ class VehicleState extends $pb.GeneratedMessage {
 }
 
 enum CommandResponse_ResponseData {
-  basicResponseData, 
-  advancedResponseBytes, 
+  basicResponseData,
+  advancedResponseBytes,
   notSet
 }
 
@@ -529,54 +633,76 @@ class CommandResponse extends $pb.GeneratedMessage {
     return $result;
   }
   CommandResponse._() : super();
-  factory CommandResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CommandResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CommandResponse.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CommandResponse.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static const $core.Map<$core.int, CommandResponse_ResponseData> _CommandResponse_ResponseDataByTag = {
-    5 : CommandResponse_ResponseData.basicResponseData,
-    6 : CommandResponse_ResponseData.advancedResponseBytes,
-    0 : CommandResponse_ResponseData.notSet
+  static const $core.Map<$core.int, CommandResponse_ResponseData>
+      _CommandResponse_ResponseDataByTag = {
+    5: CommandResponse_ResponseData.basicResponseData,
+    6: CommandResponse_ResponseData.advancedResponseBytes,
+    0: CommandResponse_ResponseData.notSet
   };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CommandResponse', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CommandResponse',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
     ..oo(0, [5, 6])
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..aOB(2, _omitFieldNames ? '' : 'success')
     ..aOS(3, _omitFieldNames ? '' : 'errorMessage')
-    ..a<$core.List<$core.int>>(5, _omitFieldNames ? '' : 'basicResponseData', $pb.PbFieldType.OY)
-    ..a<$core.List<$core.int>>(6, _omitFieldNames ? '' : 'advancedResponseBytes', $pb.PbFieldType.OY)
-    ..e<CommandStatusCode>(7, _omitFieldNames ? '' : 'statusCode', $pb.PbFieldType.OE, defaultOrMaker: CommandStatusCode.COMMAND_STATUS_CODE_UNSPECIFIED, valueOf: CommandStatusCode.valueOf, enumValues: CommandStatusCode.values)
-    ..hasRequiredFields = false
-  ;
+    ..a<$core.List<$core.int>>(
+        5, _omitFieldNames ? '' : 'basicResponseData', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        6, _omitFieldNames ? '' : 'advancedResponseBytes', $pb.PbFieldType.OY)
+    ..e<CommandStatusCode>(
+        7, _omitFieldNames ? '' : 'statusCode', $pb.PbFieldType.OE,
+        defaultOrMaker: CommandStatusCode.COMMAND_STATUS_CODE_UNSPECIFIED,
+        valueOf: CommandStatusCode.valueOf,
+        enumValues: CommandStatusCode.values)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CommandResponse clone() => CommandResponse()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CommandResponse copyWith(void Function(CommandResponse) updates) => super.copyWith((message) => updates(message as CommandResponse)) as CommandResponse;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CommandResponse copyWith(void Function(CommandResponse) updates) =>
+      super.copyWith((message) => updates(message as CommandResponse))
+          as CommandResponse;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static CommandResponse create() => CommandResponse._();
   CommandResponse createEmptyInstance() => create();
-  static $pb.PbList<CommandResponse> createRepeated() => $pb.PbList<CommandResponse>();
+  static $pb.PbList<CommandResponse> createRepeated() =>
+      $pb.PbList<CommandResponse>();
   @$core.pragma('dart2js:noInline')
-  static CommandResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CommandResponse>(create);
+  static CommandResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CommandResponse>(create);
   static CommandResponse? _defaultInstance;
 
-  CommandResponse_ResponseData whichResponseData() => _CommandResponse_ResponseDataByTag[$_whichOneof(0)]!;
+  CommandResponse_ResponseData whichResponseData() =>
+      _CommandResponse_ResponseDataByTag[$_whichOneof(0)]!;
   void clearResponseData() => clearField($_whichOneof(0));
 
   /// A unique identifier, matching the original request.
   @$pb.TagNumber(1)
   $fixnum.Int64 get messageId => $_getI64(0);
   @$pb.TagNumber(1)
-  set messageId($fixnum.Int64 v) { $_setInt64(0, v); }
+  set messageId($fixnum.Int64 v) {
+    $_setInt64(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasMessageId() => $_has(0);
   @$pb.TagNumber(1)
@@ -586,7 +712,10 @@ class CommandResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.bool get success => $_getBF(1);
   @$pb.TagNumber(2)
-  set success($core.bool v) { $_setBool(1, v); }
+  set success($core.bool v) {
+    $_setBool(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasSuccess() => $_has(1);
   @$pb.TagNumber(2)
@@ -596,7 +725,10 @@ class CommandResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.String get errorMessage => $_getSZ(2);
   @$pb.TagNumber(3)
-  set errorMessage($core.String v) { $_setString(2, v); }
+  set errorMessage($core.String v) {
+    $_setString(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasErrorMessage() => $_has(2);
   @$pb.TagNumber(3)
@@ -606,7 +738,10 @@ class CommandResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.List<$core.int> get basicResponseData => $_getN(3);
   @$pb.TagNumber(5)
-  set basicResponseData($core.List<$core.int> v) { $_setBytes(3, v); }
+  set basicResponseData($core.List<$core.int> v) {
+    $_setBytes(3, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasBasicResponseData() => $_has(3);
   @$pb.TagNumber(5)
@@ -616,7 +751,10 @@ class CommandResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(6)
   $core.List<$core.int> get advancedResponseBytes => $_getN(4);
   @$pb.TagNumber(6)
-  set advancedResponseBytes($core.List<$core.int> v) { $_setBytes(4, v); }
+  set advancedResponseBytes($core.List<$core.int> v) {
+    $_setBytes(4, v);
+  }
+
   @$pb.TagNumber(6)
   $core.bool hasAdvancedResponseBytes() => $_has(4);
   @$pb.TagNumber(6)
@@ -627,7 +765,10 @@ class CommandResponse extends $pb.GeneratedMessage {
   @$pb.TagNumber(7)
   CommandStatusCode get statusCode => $_getN(5);
   @$pb.TagNumber(7)
-  set statusCode(CommandStatusCode v) { setField(7, v); }
+  set statusCode(CommandStatusCode v) {
+    setField(7, v);
+  }
+
   @$pb.TagNumber(7)
   $core.bool hasStatusCode() => $_has(5);
   @$pb.TagNumber(7)
@@ -652,34 +793,45 @@ class CanDebugUpdate extends $pb.GeneratedMessage {
     return $result;
   }
   CanDebugUpdate._() : super();
-  factory CanDebugUpdate.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CanDebugUpdate.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CanDebugUpdate.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CanDebugUpdate.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CanDebugUpdate', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..pc<CanDebugFrame>(1, _omitFieldNames ? '' : 'frames', $pb.PbFieldType.PM, subBuilder: CanDebugFrame.create)
-    ..a<$core.int>(2, _omitFieldNames ? '' : 'droppedFrames', $pb.PbFieldType.OU3)
-    ..hasRequiredFields = false
-  ;
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CanDebugUpdate',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
+    ..pc<CanDebugFrame>(1, _omitFieldNames ? '' : 'frames', $pb.PbFieldType.PM,
+        subBuilder: CanDebugFrame.create)
+    ..a<$core.int>(
+        2, _omitFieldNames ? '' : 'droppedFrames', $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CanDebugUpdate clone() => CanDebugUpdate()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CanDebugUpdate copyWith(void Function(CanDebugUpdate) updates) => super.copyWith((message) => updates(message as CanDebugUpdate)) as CanDebugUpdate;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CanDebugUpdate copyWith(void Function(CanDebugUpdate) updates) =>
+      super.copyWith((message) => updates(message as CanDebugUpdate))
+          as CanDebugUpdate;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static CanDebugUpdate create() => CanDebugUpdate._();
   CanDebugUpdate createEmptyInstance() => create();
-  static $pb.PbList<CanDebugUpdate> createRepeated() => $pb.PbList<CanDebugUpdate>();
+  static $pb.PbList<CanDebugUpdate> createRepeated() =>
+      $pb.PbList<CanDebugUpdate>();
   @$core.pragma('dart2js:noInline')
-  static CanDebugUpdate getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CanDebugUpdate>(create);
+  static CanDebugUpdate getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CanDebugUpdate>(create);
   static CanDebugUpdate? _defaultInstance;
 
   /// The captured CAN frames in this batch. May be empty if dropped_frames > 0.
@@ -693,7 +845,10 @@ class CanDebugUpdate extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.int get droppedFrames => $_getIZ(1);
   @$pb.TagNumber(2)
-  set droppedFrames($core.int v) { $_setUnsignedInt32(1, v); }
+  set droppedFrames($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasDroppedFrames() => $_has(1);
   @$pb.TagNumber(2)
@@ -728,37 +883,49 @@ class CanDebugFrame extends $pb.GeneratedMessage {
     return $result;
   }
   CanDebugFrame._() : super();
-  factory CanDebugFrame.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
-  factory CanDebugFrame.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  factory CanDebugFrame.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory CanDebugFrame.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
 
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'CanDebugFrame', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'timestampMs', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CanDebugFrame',
+      package:
+          const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'),
+      createEmptyInstance: create)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'timestampMs', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'busId', $pb.PbFieldType.OU3)
     ..a<$core.int>(3, _omitFieldNames ? '' : 'canId', $pb.PbFieldType.OU3)
     ..aOB(4, _omitFieldNames ? '' : 'isExtendedId')
-    ..a<$core.List<$core.int>>(5, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
-    ..hasRequiredFields = false
-  ;
+    ..a<$core.List<$core.int>>(
+        5, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
 
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-  'Will be removed in next major version')
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
   CanDebugFrame clone() => CanDebugFrame()..mergeFromMessage(this);
-  @$core.Deprecated(
-  'Using this can add significant overhead to your binary. '
-  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-  'Will be removed in next major version')
-  CanDebugFrame copyWith(void Function(CanDebugFrame) updates) => super.copyWith((message) => updates(message as CanDebugFrame)) as CanDebugFrame;
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  CanDebugFrame copyWith(void Function(CanDebugFrame) updates) =>
+      super.copyWith((message) => updates(message as CanDebugFrame))
+          as CanDebugFrame;
 
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
   static CanDebugFrame create() => CanDebugFrame._();
   CanDebugFrame createEmptyInstance() => create();
-  static $pb.PbList<CanDebugFrame> createRepeated() => $pb.PbList<CanDebugFrame>();
+  static $pb.PbList<CanDebugFrame> createRepeated() =>
+      $pb.PbList<CanDebugFrame>();
   @$core.pragma('dart2js:noInline')
-  static CanDebugFrame getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<CanDebugFrame>(create);
+  static CanDebugFrame getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CanDebugFrame>(create);
   static CanDebugFrame? _defaultInstance;
 
   /// Device uptime in milliseconds at the moment this frame was received from
@@ -766,7 +933,10 @@ class CanDebugFrame extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   $fixnum.Int64 get timestampMs => $_getI64(0);
   @$pb.TagNumber(1)
-  set timestampMs($fixnum.Int64 v) { $_setInt64(0, v); }
+  set timestampMs($fixnum.Int64 v) {
+    $_setInt64(0, v);
+  }
+
   @$pb.TagNumber(1)
   $core.bool hasTimestampMs() => $_has(0);
   @$pb.TagNumber(1)
@@ -777,7 +947,10 @@ class CanDebugFrame extends $pb.GeneratedMessage {
   @$pb.TagNumber(2)
   $core.int get busId => $_getIZ(1);
   @$pb.TagNumber(2)
-  set busId($core.int v) { $_setUnsignedInt32(1, v); }
+  set busId($core.int v) {
+    $_setUnsignedInt32(1, v);
+  }
+
   @$pb.TagNumber(2)
   $core.bool hasBusId() => $_has(1);
   @$pb.TagNumber(2)
@@ -787,7 +960,10 @@ class CanDebugFrame extends $pb.GeneratedMessage {
   @$pb.TagNumber(3)
   $core.int get canId => $_getIZ(2);
   @$pb.TagNumber(3)
-  set canId($core.int v) { $_setUnsignedInt32(2, v); }
+  set canId($core.int v) {
+    $_setUnsignedInt32(2, v);
+  }
+
   @$pb.TagNumber(3)
   $core.bool hasCanId() => $_has(2);
   @$pb.TagNumber(3)
@@ -797,7 +973,10 @@ class CanDebugFrame extends $pb.GeneratedMessage {
   @$pb.TagNumber(4)
   $core.bool get isExtendedId => $_getBF(3);
   @$pb.TagNumber(4)
-  set isExtendedId($core.bool v) { $_setBool(3, v); }
+  set isExtendedId($core.bool v) {
+    $_setBool(3, v);
+  }
+
   @$pb.TagNumber(4)
   $core.bool hasIsExtendedId() => $_has(3);
   @$pb.TagNumber(4)
@@ -808,13 +987,16 @@ class CanDebugFrame extends $pb.GeneratedMessage {
   @$pb.TagNumber(5)
   $core.List<$core.int> get data => $_getN(4);
   @$pb.TagNumber(5)
-  set data($core.List<$core.int> v) { $_setBytes(4, v); }
+  set data($core.List<$core.int> v) {
+    $_setBytes(4, v);
+  }
+
   @$pb.TagNumber(5)
   $core.bool hasData() => $_has(4);
   @$pb.TagNumber(5)
   void clearData() => clearField(5);
 }
 
-
 const _omitFieldNames = $core.bool.fromEnvironment('protobuf.omit_field_names');
-const _omitMessageNames = $core.bool.fromEnvironment('protobuf.omit_message_names');
+const _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');

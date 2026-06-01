@@ -28,9 +28,12 @@ class HttpCarTransport implements CarTransport {
     required String host,
     required int port,
     required int pollingIntervalMs,
-  })  : _baseUrl = 'http://$host:$port',
-        _pollingInterval = Duration(milliseconds: pollingIntervalMs) {
-    dev.log('Polling $_baseUrl every ${pollingIntervalMs}ms', name: 'HttpTransport');
+  }) : _baseUrl = 'http://$host:$port',
+       _pollingInterval = Duration(milliseconds: pollingIntervalMs) {
+    dev.log(
+      'Polling $_baseUrl every ${pollingIntervalMs}ms',
+      name: 'HttpTransport',
+    );
     _startPolling();
   }
 
@@ -64,10 +67,11 @@ class HttpCarTransport implements CarTransport {
       body: Uint8List.fromList(message.writeToBuffer()),
     );
     if (response.statusCode < 200 || response.statusCode >= 300) {
-      dev.log('POST /cmd failed: ${response.statusCode}', name: 'HttpTransport');
-      throw HttpTransportException(
-        'POST /cmd returned ${response.statusCode}',
+      dev.log(
+        'POST /cmd failed: ${response.statusCode}',
+        name: 'HttpTransport',
       );
+      throw HttpTransportException('POST /cmd returned ${response.statusCode}');
     }
   }
 

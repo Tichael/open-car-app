@@ -34,13 +34,69 @@ final $typed_data.Uint8List systemStateDescriptor = $convert.base64Decode(
 const SystemCommand$json = {
   '1': 'SystemCommand',
   '2': [
-    {'1': 'restart_command', '3': 1, '4': 1, '5': 11, '6': '.opencar.core.v1.RestartCommand', '9': 0, '10': 'restartCommand'},
-    {'1': 'set_can_debug_enabled', '3': 2, '4': 1, '5': 11, '6': '.opencar.core.v1.SetCanDebugEnabled', '9': 0, '10': 'setCanDebugEnabled'},
-    {'1': 'update_can_debug_filters', '3': 3, '4': 1, '5': 11, '6': '.opencar.core.v1.UpdateCanDebugFilters', '9': 0, '10': 'updateCanDebugFilters'},
-    {'1': 'list_paired_phones', '3': 4, '4': 1, '5': 11, '6': '.opencar.core.v1.ListPairedPhonesCommand', '9': 0, '10': 'listPairedPhones'},
-    {'1': 'remove_paired_phone', '3': 5, '4': 1, '5': 11, '6': '.opencar.core.v1.RemovePairedPhoneCommand', '9': 0, '10': 'removePairedPhone'},
-    {'1': 'clear_paired_phones', '3': 6, '4': 1, '5': 11, '6': '.opencar.core.v1.ClearPairedPhonesCommand', '9': 0, '10': 'clearPairedPhones'},
-    {'1': 'upsert_paired_phone', '3': 7, '4': 1, '5': 11, '6': '.opencar.core.v1.UpsertPairedPhoneCommand', '9': 0, '10': 'upsertPairedPhone'},
+    {
+      '1': 'restart_command',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.RestartCommand',
+      '9': 0,
+      '10': 'restartCommand'
+    },
+    {
+      '1': 'set_can_debug_enabled',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.SetCanDebugEnabled',
+      '9': 0,
+      '10': 'setCanDebugEnabled'
+    },
+    {
+      '1': 'update_can_debug_filters',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.UpdateCanDebugFilters',
+      '9': 0,
+      '10': 'updateCanDebugFilters'
+    },
+    {
+      '1': 'list_paired_phones',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.ListPairedPhonesCommand',
+      '9': 0,
+      '10': 'listPairedPhones'
+    },
+    {
+      '1': 'remove_paired_phone',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.RemovePairedPhoneCommand',
+      '9': 0,
+      '10': 'removePairedPhone'
+    },
+    {
+      '1': 'clear_paired_phones',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.ClearPairedPhonesCommand',
+      '9': 0,
+      '10': 'clearPairedPhones'
+    },
+    {
+      '1': 'upsert_paired_phone',
+      '3': 7,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.UpsertPairedPhoneCommand',
+      '9': 0,
+      '10': 'upsertPairedPhone'
+    },
   ],
   '8': [
     {'1': 'action'},
@@ -68,8 +124,8 @@ const RestartCommand$json = {
 };
 
 /// Descriptor for `RestartCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List restartCommandDescriptor = $convert.base64Decode(
-    'Cg5SZXN0YXJ0Q29tbWFuZA==');
+final $typed_data.Uint8List restartCommandDescriptor =
+    $convert.base64Decode('Cg5SZXN0YXJ0Q29tbWFuZA==');
 
 @$core.Deprecated('Use setCanDebugEnabledDescriptor instead')
 const SetCanDebugEnabled$json = {
@@ -89,7 +145,14 @@ final $typed_data.Uint8List setCanDebugEnabledDescriptor = $convert.base64Decode
 const UpdateCanDebugFilters$json = {
   '1': 'UpdateCanDebugFilters',
   '2': [
-    {'1': 'filters', '3': 1, '4': 3, '5': 11, '6': '.opencar.core.v1.CanDebugFilter', '10': 'filters'},
+    {
+      '1': 'filters',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.opencar.core.v1.CanDebugFilter',
+      '10': 'filters'
+    },
   ],
 };
 
@@ -119,8 +182,8 @@ const ListPairedPhonesCommand$json = {
 };
 
 /// Descriptor for `ListPairedPhonesCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List listPairedPhonesCommandDescriptor = $convert.base64Decode(
-    'ChdMaXN0UGFpcmVkUGhvbmVzQ29tbWFuZA==');
+final $typed_data.Uint8List listPairedPhonesCommandDescriptor =
+    $convert.base64Decode('ChdMaXN0UGFpcmVkUGhvbmVzQ29tbWFuZA==');
 
 @$core.Deprecated('Use removePairedPhoneCommandDescriptor instead')
 const RemovePairedPhoneCommand$json = {
@@ -131,9 +194,10 @@ const RemovePairedPhoneCommand$json = {
 };
 
 /// Descriptor for `RemovePairedPhoneCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List removePairedPhoneCommandDescriptor = $convert.base64Decode(
-    'ChhSZW1vdmVQYWlyZWRQaG9uZUNvbW1hbmQSGwoJZGV2aWNlX2lkGAEgASgMUghkZXZpY2VJZA'
-    '==');
+final $typed_data.Uint8List removePairedPhoneCommandDescriptor =
+    $convert.base64Decode(
+        'ChhSZW1vdmVQYWlyZWRQaG9uZUNvbW1hbmQSGwoJZGV2aWNlX2lkGAEgASgMUghkZXZpY2VJZA'
+        '==');
 
 @$core.Deprecated('Use clearPairedPhonesCommandDescriptor instead')
 const ClearPairedPhonesCommand$json = {
@@ -141,8 +205,8 @@ const ClearPairedPhonesCommand$json = {
 };
 
 /// Descriptor for `ClearPairedPhonesCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List clearPairedPhonesCommandDescriptor = $convert.base64Decode(
-    'ChhDbGVhclBhaXJlZFBob25lc0NvbW1hbmQ=');
+final $typed_data.Uint8List clearPairedPhonesCommandDescriptor =
+    $convert.base64Decode('ChhDbGVhclBhaXJlZFBob25lc0NvbW1hbmQ=');
 
 @$core.Deprecated('Use upsertPairedPhoneCommandDescriptor instead')
 const UpsertPairedPhoneCommand$json = {
@@ -153,9 +217,10 @@ const UpsertPairedPhoneCommand$json = {
 };
 
 /// Descriptor for `UpsertPairedPhoneCommand`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List upsertPairedPhoneCommandDescriptor = $convert.base64Decode(
-    'ChhVcHNlcnRQYWlyZWRQaG9uZUNvbW1hbmQSGwoJZGV2aWNlX2lkGAEgASgMUghkZXZpY2VJZA'
-    '==');
+final $typed_data.Uint8List upsertPairedPhoneCommandDescriptor =
+    $convert.base64Decode(
+        'ChhVcHNlcnRQYWlyZWRQaG9uZUNvbW1hbmQSGwoJZGV2aWNlX2lkGAEgASgMUghkZXZpY2VJZA'
+        '==');
 
 @$core.Deprecated('Use systemEventDescriptor instead')
 const SystemEvent$json = {
@@ -163,6 +228,5 @@ const SystemEvent$json = {
 };
 
 /// Descriptor for `SystemEvent`. Decode as a `google.protobuf.DescriptorProto`.
-final $typed_data.Uint8List systemEventDescriptor = $convert.base64Decode(
-    'CgtTeXN0ZW1FdmVudA==');
-
+final $typed_data.Uint8List systemEventDescriptor =
+    $convert.base64Decode('CgtTeXN0ZW1FdmVudA==');

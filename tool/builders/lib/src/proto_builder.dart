@@ -21,8 +21,9 @@ class ProtoBuilder implements Builder {
   Future<void> build(BuildStep buildStep) async {
     // Discover all .proto files and register them as tracked dependencies.
     final protoAssets = <AssetId>[];
-    await for (final asset
-        in buildStep.findAssets(Glob('contracts/**/*.proto'))) {
+    await for (final asset in buildStep.findAssets(
+      Glob('contracts/**/*.proto'),
+    )) {
       // Reading the asset content registers it as a dependency: if the file
       // changes, build_runner will invalidate this builder's output and re-run.
       await buildStep.readAsString(asset);
@@ -49,15 +50,11 @@ class ProtoBuilder implements Builder {
 
     Directory('lib/generated').createSync(recursive: true);
 
-    final result = await Process.run(
-      'protoc',
-      [
-        '--proto_path=contracts',
-        '--dart_out=grpc:lib/generated',
-        ...protoAssets.map((id) => id.path),
-      ],
-      environment: env,
-    );
+    final result = await Process.run('protoc', [
+      '--proto_path=contracts',
+      '--dart_out=grpc:lib/generated',
+      ...protoAssets.map((id) => id.path),
+    ], environment: env);
 
     if (result.exitCode != 0) {
       throw StateError('protoc failed:\n${result.stderr}');
@@ -76,11 +73,9 @@ class ProtoBuilder implements Builder {
   }
 
   Future<bool> _dartPluginAvailable(Map<String, String> env) async {
-    final result = await Process.run(
-      'which',
-      ['protoc-gen-dart'],
-      environment: env,
-    );
+    final result = await Process.run('which', [
+      'protoc-gen-dart',
+    ], environment: env);
     return result.exitCode == 0;
   }
 
@@ -92,10 +87,7 @@ class ProtoBuilder implements Builder {
     final pubCacheBin = _pubCacheBinDir();
     final current = Platform.environment;
     final existingPath = current['PATH'] ?? '';
-    return {
-      ...current,
-      'PATH': '$pubCacheBin:$existingPath',
-    };
+    return {...current, 'PATH': '$pubCacheBin:$existingPath'};
   }
 
   String _pubCacheBinDir() {

@@ -15,13 +15,18 @@ import 'package:protobuf/protobuf.dart' as $pb;
 
 /// Represent the different gears possible in the car
 class AdvancedState_Gear extends $pb.ProtobufEnum {
-  static const AdvancedState_Gear GEAR_UNSPECIFIED = AdvancedState_Gear._(0, _omitEnumNames ? '' : 'GEAR_UNSPECIFIED');
-  static const AdvancedState_Gear GEAR_PARK = AdvancedState_Gear._(1, _omitEnumNames ? '' : 'GEAR_PARK');
-  static const AdvancedState_Gear GEAR_REVERSE = AdvancedState_Gear._(2, _omitEnumNames ? '' : 'GEAR_REVERSE');
-  static const AdvancedState_Gear GEAR_NEUTRAL = AdvancedState_Gear._(3, _omitEnumNames ? '' : 'GEAR_NEUTRAL');
-  static const AdvancedState_Gear GEAR_DRIVE = AdvancedState_Gear._(4, _omitEnumNames ? '' : 'GEAR_DRIVE');
+  static const AdvancedState_Gear GEAR_UNSPECIFIED =
+      AdvancedState_Gear._(0, _omitEnumNames ? '' : 'GEAR_UNSPECIFIED');
+  static const AdvancedState_Gear GEAR_PARK =
+      AdvancedState_Gear._(1, _omitEnumNames ? '' : 'GEAR_PARK');
+  static const AdvancedState_Gear GEAR_REVERSE =
+      AdvancedState_Gear._(2, _omitEnumNames ? '' : 'GEAR_REVERSE');
+  static const AdvancedState_Gear GEAR_NEUTRAL =
+      AdvancedState_Gear._(3, _omitEnumNames ? '' : 'GEAR_NEUTRAL');
+  static const AdvancedState_Gear GEAR_DRIVE =
+      AdvancedState_Gear._(4, _omitEnumNames ? '' : 'GEAR_DRIVE');
 
-  static const $core.List<AdvancedState_Gear> values = <AdvancedState_Gear> [
+  static const $core.List<AdvancedState_Gear> values = <AdvancedState_Gear>[
     GEAR_UNSPECIFIED,
     GEAR_PARK,
     GEAR_REVERSE,
@@ -29,11 +34,11 @@ class AdvancedState_Gear extends $pb.ProtobufEnum {
     GEAR_DRIVE,
   ];
 
-  static final $core.Map<$core.int, AdvancedState_Gear> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, AdvancedState_Gear> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static AdvancedState_Gear? valueOf($core.int value) => _byValue[value];
 
   const AdvancedState_Gear._($core.int v, $core.String n) : super(v, n);
 }
-
 
 const _omitEnumNames = $core.bool.fromEnvironment('protobuf.omit_enum_names');

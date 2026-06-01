@@ -155,8 +155,10 @@ class MqttCarTransport with WidgetsBindingObserver implements CarTransport {
   }
 
   void _sendHeartbeat() {
-    if (_client.connectionStatus?.state != MqttConnectionState.connected)
+    if (_client.connectionStatus?.state != MqttConnectionState.connected) {
       return;
+    }
+
     final msg = AppToDevice()
       ..messageId = Int64(_heartbeatMessageId++)
       ..platformId = _platformId

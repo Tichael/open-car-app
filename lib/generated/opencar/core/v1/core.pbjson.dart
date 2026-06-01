@@ -37,9 +37,31 @@ const AppToDevice$json = {
     {'1': 'message_id', '3': 1, '4': 1, '5': 4, '10': 'messageId'},
     {'1': 'platform_id', '3': 2, '4': 1, '5': 13, '10': 'platformId'},
     {'1': 'source_device_id', '3': 6, '4': 1, '5': 12, '10': 'sourceDeviceId'},
-    {'1': 'system_command', '3': 3, '4': 1, '5': 11, '6': '.opencar.core.v1.SystemCommand', '9': 0, '10': 'systemCommand'},
-    {'1': 'basic_command_bytes', '3': 4, '4': 1, '5': 12, '9': 0, '10': 'basicCommandBytes'},
-    {'1': 'advanced_command_bytes', '3': 5, '4': 1, '5': 12, '9': 0, '10': 'advancedCommandBytes'},
+    {
+      '1': 'system_command',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.SystemCommand',
+      '9': 0,
+      '10': 'systemCommand'
+    },
+    {
+      '1': 'basic_command_bytes',
+      '3': 4,
+      '4': 1,
+      '5': 12,
+      '9': 0,
+      '10': 'basicCommandBytes'
+    },
+    {
+      '1': 'advanced_command_bytes',
+      '3': 5,
+      '4': 1,
+      '5': 12,
+      '9': 0,
+      '10': 'advancedCommandBytes'
+    },
     {'1': 'heartbeat', '3': 7, '4': 1, '5': 8, '9': 0, '10': 'heartbeat'},
   ],
   '8': [
@@ -63,10 +85,42 @@ const DeviceToApp$json = {
   '2': [
     {'1': 'timestamp_ms', '3': 1, '4': 1, '5': 4, '10': 'timestampMs'},
     {'1': 'platform_id', '3': 2, '4': 1, '5': 13, '10': 'platformId'},
-    {'1': 'state_update', '3': 3, '4': 1, '5': 11, '6': '.opencar.core.v1.StateUpdate', '9': 0, '10': 'stateUpdate'},
-    {'1': 'command_response', '3': 4, '4': 1, '5': 11, '6': '.opencar.core.v1.CommandResponse', '9': 0, '10': 'commandResponse'},
-    {'1': 'can_debug_update', '3': 5, '4': 1, '5': 11, '6': '.opencar.core.v1.CanDebugUpdate', '9': 0, '10': 'canDebugUpdate'},
-    {'1': 'system_event', '3': 6, '4': 1, '5': 11, '6': '.opencar.core.v1.SystemEvent', '9': 0, '10': 'systemEvent'},
+    {
+      '1': 'state_update',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.StateUpdate',
+      '9': 0,
+      '10': 'stateUpdate'
+    },
+    {
+      '1': 'command_response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.CommandResponse',
+      '9': 0,
+      '10': 'commandResponse'
+    },
+    {
+      '1': 'can_debug_update',
+      '3': 5,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.CanDebugUpdate',
+      '9': 0,
+      '10': 'canDebugUpdate'
+    },
+    {
+      '1': 'system_event',
+      '3': 6,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.SystemEvent',
+      '9': 0,
+      '10': 'systemEvent'
+    },
   ],
   '8': [
     {'1': 'payload'},
@@ -87,8 +141,22 @@ final $typed_data.Uint8List deviceToAppDescriptor = $convert.base64Decode(
 const StateUpdate$json = {
   '1': 'StateUpdate',
   '2': [
-    {'1': 'system_state', '3': 1, '4': 1, '5': 11, '6': '.opencar.core.v1.SystemState', '10': 'systemState'},
-    {'1': 'vehicle_state', '3': 2, '4': 1, '5': 11, '6': '.opencar.core.v1.VehicleState', '10': 'vehicleState'},
+    {
+      '1': 'system_state',
+      '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.SystemState',
+      '10': 'systemState'
+    },
+    {
+      '1': 'vehicle_state',
+      '3': 2,
+      '4': 1,
+      '5': 11,
+      '6': '.opencar.core.v1.VehicleState',
+      '10': 'vehicleState'
+    },
   ],
 };
 
@@ -102,8 +170,20 @@ final $typed_data.Uint8List stateUpdateDescriptor = $convert.base64Decode(
 const VehicleState$json = {
   '1': 'VehicleState',
   '2': [
-    {'1': 'basic_state_bytes', '3': 1, '4': 1, '5': 12, '10': 'basicStateBytes'},
-    {'1': 'advanced_state_bytes', '3': 2, '4': 1, '5': 12, '10': 'advancedStateBytes'},
+    {
+      '1': 'basic_state_bytes',
+      '3': 1,
+      '4': 1,
+      '5': 12,
+      '10': 'basicStateBytes'
+    },
+    {
+      '1': 'advanced_state_bytes',
+      '3': 2,
+      '4': 1,
+      '5': 12,
+      '10': 'advancedStateBytes'
+    },
   ],
 };
 
@@ -119,9 +199,30 @@ const CommandResponse$json = {
     {'1': 'message_id', '3': 1, '4': 1, '5': 4, '10': 'messageId'},
     {'1': 'success', '3': 2, '4': 1, '5': 8, '10': 'success'},
     {'1': 'error_message', '3': 3, '4': 1, '5': 9, '10': 'errorMessage'},
-    {'1': 'basic_response_data', '3': 5, '4': 1, '5': 12, '9': 0, '10': 'basicResponseData'},
-    {'1': 'advanced_response_bytes', '3': 6, '4': 1, '5': 12, '9': 0, '10': 'advancedResponseBytes'},
-    {'1': 'status_code', '3': 7, '4': 1, '5': 14, '6': '.opencar.core.v1.CommandStatusCode', '10': 'statusCode'},
+    {
+      '1': 'basic_response_data',
+      '3': 5,
+      '4': 1,
+      '5': 12,
+      '9': 0,
+      '10': 'basicResponseData'
+    },
+    {
+      '1': 'advanced_response_bytes',
+      '3': 6,
+      '4': 1,
+      '5': 12,
+      '9': 0,
+      '10': 'advancedResponseBytes'
+    },
+    {
+      '1': 'status_code',
+      '3': 7,
+      '4': 1,
+      '5': 14,
+      '6': '.opencar.core.v1.CommandStatusCode',
+      '10': 'statusCode'
+    },
   ],
   '8': [
     {'1': 'response_data'},
@@ -141,7 +242,14 @@ final $typed_data.Uint8List commandResponseDescriptor = $convert.base64Decode(
 const CanDebugUpdate$json = {
   '1': 'CanDebugUpdate',
   '2': [
-    {'1': 'frames', '3': 1, '4': 3, '5': 11, '6': '.opencar.core.v1.CanDebugFrame', '10': 'frames'},
+    {
+      '1': 'frames',
+      '3': 1,
+      '4': 3,
+      '5': 11,
+      '6': '.opencar.core.v1.CanDebugFrame',
+      '10': 'frames'
+    },
     {'1': 'dropped_frames', '3': 2, '4': 1, '5': 13, '10': 'droppedFrames'},
   ],
 };
@@ -168,4 +276,3 @@ final $typed_data.Uint8List canDebugFrameDescriptor = $convert.base64Decode(
     'Cg1DYW5EZWJ1Z0ZyYW1lEiEKDHRpbWVzdGFtcF9tcxgBIAEoBFILdGltZXN0YW1wTXMSFQoGYn'
     'VzX2lkGAIgASgNUgVidXNJZBIVCgZjYW5faWQYAyABKA1SBWNhbklkEiQKDmlzX2V4dGVuZGVk'
     'X2lkGAQgASgIUgxpc0V4dGVuZGVkSWQSEgoEZGF0YRgFIAEoDFIEZGF0YQ==');
-

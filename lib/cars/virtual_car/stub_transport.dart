@@ -31,15 +31,17 @@ class StubCarTransport implements CarTransport {
       uptimeS: 0,
     );
 
-    _emit(DeviceToApp(
-      stateUpdate: StateUpdate(
-        systemState: systemState,
-        vehicleState: VehicleState(
-          basicStateBytes: basicState.writeToBuffer(),
-          advancedStateBytes: advancedState.writeToBuffer(),
+    _emit(
+      DeviceToApp(
+        stateUpdate: StateUpdate(
+          systemState: systemState,
+          vehicleState: VehicleState(
+            basicStateBytes: basicState.writeToBuffer(),
+            advancedStateBytes: advancedState.writeToBuffer(),
+          ),
         ),
       ),
-    ));
+    );
   }
 
   void _emit(DeviceToApp msg) {
@@ -59,22 +61,26 @@ class StubCarTransport implements CarTransport {
     final locked = cmd.doorLock.lock;
 
     // Acknowledge the command.
-    _emit(DeviceToApp(
-      commandResponse: CommandResponse(
-        messageId: message.messageId,
-        success: true,
-        statusCode: CommandStatusCode.COMMAND_STATUS_CODE_OK,
-      ),
-    ));
-
-    // Emit the resulting state update.
-    _emit(DeviceToApp(
-      stateUpdate: StateUpdate(
-        vehicleState: VehicleState(
-          basicStateBytes: BasicState(areDoorsLocked: locked).writeToBuffer(),
+    _emit(
+      DeviceToApp(
+        commandResponse: CommandResponse(
+          messageId: message.messageId,
+          success: true,
+          statusCode: CommandStatusCode.COMMAND_STATUS_CODE_OK,
         ),
       ),
-    ));
+    );
+
+    // Emit the resulting state update.
+    _emit(
+      DeviceToApp(
+        stateUpdate: StateUpdate(
+          vehicleState: VehicleState(
+            basicStateBytes: BasicState(areDoorsLocked: locked).writeToBuffer(),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
