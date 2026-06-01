@@ -40,6 +40,7 @@ const AppToDevice$json = {
     {'1': 'system_command', '3': 3, '4': 1, '5': 11, '6': '.opencar.core.v1.SystemCommand', '9': 0, '10': 'systemCommand'},
     {'1': 'basic_command_bytes', '3': 4, '4': 1, '5': 12, '9': 0, '10': 'basicCommandBytes'},
     {'1': 'advanced_command_bytes', '3': 5, '4': 1, '5': 12, '9': 0, '10': 'advancedCommandBytes'},
+    {'1': 'heartbeat', '3': 7, '4': 1, '5': 8, '9': 0, '10': 'heartbeat'},
   ],
   '8': [
     {'1': 'payload'},
@@ -53,7 +54,8 @@ final $typed_data.Uint8List appToDeviceDescriptor = $convert.base64Decode(
     'RGV2aWNlSWQSRwoOc3lzdGVtX2NvbW1hbmQYAyABKAsyHi5vcGVuY2FyLmNvcmUudjEuU3lzdG'
     'VtQ29tbWFuZEgAUg1zeXN0ZW1Db21tYW5kEjAKE2Jhc2ljX2NvbW1hbmRfYnl0ZXMYBCABKAxI'
     'AFIRYmFzaWNDb21tYW5kQnl0ZXMSNgoWYWR2YW5jZWRfY29tbWFuZF9ieXRlcxgFIAEoDEgAUh'
-    'RhZHZhbmNlZENvbW1hbmRCeXRlc0IJCgdwYXlsb2Fk');
+    'RhZHZhbmNlZENvbW1hbmRCeXRlcxIeCgloZWFydGJlYXQYByABKAhIAFIJaGVhcnRiZWF0QgkK'
+    'B3BheWxvYWQ=');
 
 @$core.Deprecated('Use deviceToAppDescriptor instead')
 const DeviceToApp$json = {

@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'dart:math' as math;
 
+import 'package:fixnum/fixnum.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:mqtt5_client/mqtt5_client.dart';
 import 'package:mqtt5_client/mqtt5_server_client.dart';
 import 'package:open_car_app/config/mqtt_broker_config.g.dart';
@@ -11,23 +13,36 @@ import 'package:typed_data/typed_data.dart' as typed;
 
 import 'car_transport.dart';
 
-class MqttCarTransport implements CarTransport {
+class MqttCarTransport with WidgetsBindingObserver implements CarTransport {
   final _controller = StreamController<DeviceToApp>.broadcast();
   StreamSubscription<List<MqttReceivedMessage<MqttMessage>>>?
   _updatesSubscription;
   Timer? _reconnectTimer;
+  Timer? _heartbeatTimer;
+  Timer? _backgroundPauseTimer;
   int _reconnectAttempt = 0;
   bool _disposed = false;
+  bool _heartbeatPaused = false;
+
+  static const _heartbeatInterval = Duration(seconds: 5);
+  static const _backgroundPauseDelay = Duration(seconds: 30);
 
   late final MqttServerClient _client;
   late final String _cmdTopic;
   late final String _dataTopic;
+  late final int _platformId;
+  late final List<int> _sourceDeviceId;
+  int _heartbeatMessageId = 0;
 
   MqttCarTransport({
     required String commandTopicTemplate,
     required String dataTopicTemplate,
     required String connectionClientId,
+    required int platformId,
+    required List<int> sourceDeviceId,
   }) {
+    _platformId = platformId;
+    _sourceDeviceId = sourceDeviceId;
     _cmdTopic = commandTopicTemplate.replaceAll('{client_id}', kMqttClientId);
     _dataTopic = dataTopicTemplate.replaceAll('{client_id}', kMqttClientId);
 
@@ -46,11 +61,35 @@ class MqttCarTransport implements CarTransport {
         .withClientIdentifier(connectionClientId)
         .startClean();
 
+    WidgetsBinding.instance.addObserver(this);
+
     unawaited(_connect());
     dev.log(
       'Connecting to $kMqttBrokerHost:$kMqttBrokerPort',
       name: 'MqttTransport',
     );
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _backgroundPauseTimer?.cancel();
+      _backgroundPauseTimer = null;
+      if (_heartbeatPaused) {
+        _heartbeatPaused = false;
+        dev.log('App resumed — restarting heartbeat', name: 'MqttTransport');
+        _startHeartbeat();
+      }
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      _backgroundPauseTimer ??= Timer(_backgroundPauseDelay, () {
+        _backgroundPauseTimer = null;
+        _heartbeatPaused = true;
+        _heartbeatTimer?.cancel();
+        _heartbeatTimer = null;
+        dev.log('App backgrounded — heartbeat paused', name: 'MqttTransport');
+      });
+    }
   }
 
   Future<void> _connect() async {
@@ -97,11 +136,35 @@ class MqttCarTransport implements CarTransport {
     _reconnectAttempt = 0;
     dev.log('Connected; subscribing to $_dataTopic', name: 'MqttTransport');
     _client.subscribe(_dataTopic, MqttQos.atLeastOnce);
+    _startHeartbeat();
     // Cancel any existing subscription before adding a new one — _onConnected
     // fires on every CONNACK (initial connection and each auto-reconnect), so
     // without this guard we would accumulate duplicate listeners.
     _updatesSubscription?.cancel();
     _updatesSubscription = _client.updates.listen(_onMessage);
+  }
+
+  void _startHeartbeat() {
+    if (_heartbeatPaused) return;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = Timer.periodic(
+      _heartbeatInterval,
+      (_) => _sendHeartbeat(),
+    );
+    _sendHeartbeat(); // send immediately on connect
+  }
+
+  void _sendHeartbeat() {
+    if (_client.connectionStatus?.state != MqttConnectionState.connected)
+      return;
+    final msg = AppToDevice()
+      ..messageId = Int64(_heartbeatMessageId++)
+      ..platformId = _platformId
+      ..sourceDeviceId = _sourceDeviceId
+      ..heartbeat = true;
+    final buffer = typed.Uint8Buffer()..addAll(msg.writeToBuffer());
+    _client.publishMessage(_cmdTopic, MqttQos.atLeastOnce, buffer);
+    dev.log('Heartbeat sent', name: 'MqttTransport');
   }
 
   void _onAutoReconnected() {
@@ -125,6 +188,8 @@ class MqttCarTransport implements CarTransport {
   }
 
   void _onDisconnected() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
     if (_disposed) return;
     final origin = _client.connectionStatus?.disconnectionOrigin;
     final reason = _client.connectionStatus?.reasonCode;
@@ -176,7 +241,7 @@ class MqttCarTransport implements CarTransport {
       dev.log('Send skipped: not connected', name: 'MqttTransport');
       return;
     }
-    if (!message.hasBasicCommandBytes()) {
+    if (!message.hasBasicCommandBytes() && !message.hasHeartbeat()) {
       dev.log(
         'Send skipped: advanced command not supported over MQTT',
         name: 'MqttTransport',
@@ -190,9 +255,14 @@ class MqttCarTransport implements CarTransport {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _disposed = true;
     _reconnectTimer?.cancel();
     _reconnectTimer = null;
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+    _backgroundPauseTimer?.cancel();
+    _backgroundPauseTimer = null;
     _updatesSubscription?.cancel();
     _client.disconnect();
     _controller.close();

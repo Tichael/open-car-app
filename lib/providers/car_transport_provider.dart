@@ -79,6 +79,8 @@ final carTransportProvider = Provider<CarTransport>((ref) {
     connectionClientId: String.fromCharCodes(
       ref.read(bleSourceDeviceIdProvider),
     ),
+    platformId: vehicle.platformId,
+    sourceDeviceId: ref.read(bleSourceDeviceIdProvider),
   );
   dev.log('Using MQTT transport', name: 'TransportProvider');
   ref.onDispose(transport.dispose);

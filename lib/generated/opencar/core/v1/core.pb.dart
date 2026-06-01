@@ -23,6 +23,7 @@ enum AppToDevice_Payload {
   systemCommand, 
   basicCommandBytes, 
   advancedCommandBytes, 
+  heartbeat, 
   notSet
 }
 
@@ -36,6 +37,7 @@ class AppToDevice extends $pb.GeneratedMessage {
     $core.List<$core.int>? basicCommandBytes,
     $core.List<$core.int>? advancedCommandBytes,
     $core.List<$core.int>? sourceDeviceId,
+    $core.bool? heartbeat,
   }) {
     final $result = create();
     if (messageId != null) {
@@ -56,6 +58,9 @@ class AppToDevice extends $pb.GeneratedMessage {
     if (sourceDeviceId != null) {
       $result.sourceDeviceId = sourceDeviceId;
     }
+    if (heartbeat != null) {
+      $result.heartbeat = heartbeat;
+    }
     return $result;
   }
   AppToDevice._() : super();
@@ -66,16 +71,18 @@ class AppToDevice extends $pb.GeneratedMessage {
     3 : AppToDevice_Payload.systemCommand,
     4 : AppToDevice_Payload.basicCommandBytes,
     5 : AppToDevice_Payload.advancedCommandBytes,
+    7 : AppToDevice_Payload.heartbeat,
     0 : AppToDevice_Payload.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'AppToDevice', package: const $pb.PackageName(_omitMessageNames ? '' : 'opencar.core.v1'), createEmptyInstance: create)
-    ..oo(0, [3, 4, 5])
+    ..oo(0, [3, 4, 5, 7])
     ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'messageId', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$core.int>(2, _omitFieldNames ? '' : 'platformId', $pb.PbFieldType.OU3)
     ..aOM<$0.SystemCommand>(3, _omitFieldNames ? '' : 'systemCommand', subBuilder: $0.SystemCommand.create)
     ..a<$core.List<$core.int>>(4, _omitFieldNames ? '' : 'basicCommandBytes', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(5, _omitFieldNames ? '' : 'advancedCommandBytes', $pb.PbFieldType.OY)
     ..a<$core.List<$core.int>>(6, _omitFieldNames ? '' : 'sourceDeviceId', $pb.PbFieldType.OY)
+    ..aOB(7, _omitFieldNames ? '' : 'heartbeat')
     ..hasRequiredFields = false
   ;
 
@@ -169,6 +176,18 @@ class AppToDevice extends $pb.GeneratedMessage {
   $core.bool hasSourceDeviceId() => $_has(5);
   @$pb.TagNumber(6)
   void clearSourceDeviceId() => clearField(6);
+
+  /// A heartbeat with no payload. Sent periodically over MQTT to signal that
+  /// a client is active, allowing the vehicle to throttle state updates when
+  /// no clients are connected.
+  @$pb.TagNumber(7)
+  $core.bool get heartbeat => $_getBF(6);
+  @$pb.TagNumber(7)
+  set heartbeat($core.bool v) { $_setBool(6, v); }
+  @$pb.TagNumber(7)
+  $core.bool hasHeartbeat() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearHeartbeat() => clearField(7);
 }
 
 enum DeviceToApp_Payload {
