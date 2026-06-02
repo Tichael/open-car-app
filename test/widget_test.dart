@@ -1,30 +1,58 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:open_car_app/config/paired_vehicle_config.dart';
+import 'package:open_car_app/cars/virtual_car/stub_transport.dart';
 import 'package:open_car_app/main.dart';
+import 'package:open_car_app/providers/car_transport_provider.dart';
+import 'package:open_car_app/providers/paired_vehicle_provider.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  testWidgets('shows the pairing wizard when nothing is paired', (
+    tester,
+  ) async {
+    await tester.pumpWidget(const ProviderScope(child: OpenCarApp()));
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+    expect(find.text('Pair Your Vehicle'), findsOneWidget);
+    expect(
+      find.text('Hold the pairing button on your vehicle'),
+      findsOneWidget,
+    );
+    expect(find.text('Start'), findsOneWidget);
+  });
+
+  testWidgets('shows the dashboard when a vehicle is paired', (tester) async {
+    final stubTransport = StubCarTransport();
+    addTearDown(stubTransport.dispose);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          initialPairedVehicleConfigProvider.overrideWithValue(
+            const PairedVehicleConfig(
+              vehicleId: 'virtual_car',
+              bleRemoteId: '00:11:22:33:44:55',
+              transportPreference: TransportPreference.ble,
+            ),
+          ),
+          carTransportProvider.overrideWithValue(stubTransport),
+        ],
+        child: const OpenCarApp(),
+      ),
+    );
+
+    await tester.pump();
     await tester.pump();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Open Car'), findsOneWidget);
+    expect(find.text('State'), findsOneWidget);
+    expect(find.text('Controls'), findsOneWidget);
+    expect(find.text('Odometer'), findsOneWidget);
+    expect(find.text('Driving'), findsOneWidget);
   });
 }
