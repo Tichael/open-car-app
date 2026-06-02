@@ -3,9 +3,12 @@
         "dockerfile": "Dockerfile",
         "context": ".."
     },
+    "postCreateCommand": "flutter config --no-enable-linux-desktop && flutter pub get",
     "customizations": {
         "vscode": {
             "extensions": [
+                "Dart-Code.dart-code",
+                "Dart-Code.flutter",
                 "streetsidesoftware.code-spell-checker",
                 "vivaxy.vscode-conventional-commits",
                 "dotenv.dotenv-vscode",

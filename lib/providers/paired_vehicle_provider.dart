@@ -1,0 +1,28 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:open_car_app/config/paired_vehicle_config.dart';
+
+/// Holds the value loaded from SharedPreferences before [runApp].
+/// Overridden in [ProviderScope] at app startup — never reads storage itself.
+final initialPairedVehicleConfigProvider = Provider<PairedVehicleConfig?>(
+  (_) => null,
+);
+
+class PairedVehicleNotifier extends Notifier<PairedVehicleConfig?> {
+  @override
+  PairedVehicleConfig? build() => ref.read(initialPairedVehicleConfigProvider);
+
+  Future<void> pair(PairedVehicleConfig config) async {
+    await config.save();
+    state = config;
+  }
+
+  Future<void> unpair() async {
+    await PairedVehicleConfig.clear();
+    state = null;
+  }
+}
+
+final pairedVehicleProvider =
+    NotifierProvider<PairedVehicleNotifier, PairedVehicleConfig?>(
+      PairedVehicleNotifier.new,
+    );

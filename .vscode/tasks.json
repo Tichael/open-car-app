@@ -1,0 +1,14 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Ensure ADB device connected",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "${workspaceFolder}/.vscode/scripts/ensure-adb-device.sh"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
