@@ -54,7 +54,7 @@ abstract class CarTransport {
 **Selection order (debug):** HTTP (if `transportPreference == http` in `pairedVehicleProvider`) → BLE (if `BleReady`) → MQTT. HTTP branch is compiled away in release via `kDebugMode`. `vehicleStateProvider` uses `ref.watch(carTransportProvider)` to re-subscribe on transport switch.
 
 ### Pairing & connection model
-Device advertises **only** while its pairing button is held. The app never scans outside `PairingWizardScreen`. BLE is implemented with **`flutter_reactive_ble: ^5.4.1`** (replaced `flutter_blue_plus`).
+Device advertises **only** while its pairing button is held. The app never scans outside `PairingWizardScreen`. BLE is implemented with **`flutter_reactive_ble: ^5.4.1`**.
 
 - **First launch / unpaired**: `AppEntryRouter` shows `PairingWizardScreen`. User holds button → wizard scans → taps Pair → `connectToDevice()` → `discoverAllServices()` → write-probe to RX char triggers Android pairing dialog → bond confirmed (write succeeds) → `pairedVehicleProvider.notifier.pair(config)` → router rebuilds to dashboard.
 - **Write-probe bonding**: wizard writes `[0]` to the app→device (RX) characteristic in a retry loop. Firmware enforces bonding on writes (not CCCD/subscribe), so first write returns `ATT_INSUFFICIENT_AUTH`, Android shows the dialog, bonds, and retry succeeds. Config is saved **only** after the write succeeds (bond proven). A `Future.any([write, disconnectCompleter.future])` race prevents hanging if the link drops mid-write.
