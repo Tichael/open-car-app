@@ -21,6 +21,9 @@ jobs:
           channel: stable
           cache: true
 
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
+
       - name: Install dependencies
         run: flutter pub get
 
@@ -55,6 +58,9 @@ jobs:
           flutter-version-file: .flutter-version
           channel: stable
           cache: true
+
+      - name: Install protoc
+        run: sudo apt-get update && sudo apt-get install -y protobuf-compiler
 
       - name: Install dependencies
         run: flutter pub get
