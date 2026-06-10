@@ -420,10 +420,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
+      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.0"
+    version: "1.18.0"
   mime:
     dependency: transitive
     description:
@@ -436,10 +436,10 @@ packages:
     dependency: "direct main"
     description:
       name: mqtt5_client
-      sha256: "643ceb3154d93fd1fb990dbc870064543d1750b23cf69d71329c5e1d13d02e4b"
+      sha256: a716e6bddc4715cd585ac7147383080dffafb6b7d55f370dc596b38c85e8c557
       url: "https://pub.dev"
     source: hosted
-    version: "4.17.0"
+    version: "4.17.1"
   open_car_builders:
     dependency: "direct dev"
     description:
@@ -760,10 +760,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "8161c84903fd860b26bfdefb7963b3f0b68fee7adea0f59ef805ecca346f0c7a"
+      sha256: "949a932224383300f01be9221c39180316445ecb8e7547f70a41a35bf421fb9e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.10"
+    version: "0.7.11"
   timing:
     dependency: transitive
     description:
